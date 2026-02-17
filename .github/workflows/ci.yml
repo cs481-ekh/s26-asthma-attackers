@@ -1,0 +1,31 @@
+# CI: build and test on every push and pull request.
+# See https://docs.github.com/en/actions for more on GitHub Actions.
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run build
+        run: chmod +x build.sh && ./build.sh
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run tests
+        run: chmod +x test.sh && ./test.sh
