@@ -55,6 +55,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String? _selectedValue;
+  final List<String> _dropdownOptions = ['A', 'B', 'C'];
 
   void _incrementCounter() {
     setState(() {
@@ -109,6 +111,23 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            const SizedBox(height: 40),
+            // Drop-down selector centered in the app
+            DropdownButton<String>(
+              value: _selectedValue,
+              hint: const Text('Select an option'),
+              items: _dropdownOptions.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedValue = newValue;
+                });
+              },
+            ),
           ],
         ),
       ),
@@ -116,7 +135,8 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }
+  
