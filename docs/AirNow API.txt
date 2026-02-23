@@ -1,0 +1,109 @@
+﻿AirNow API – Simple Usage Guide (ZIP & Mobile Location)
+API Provider: AirNow (U.S. EPA)
+Website: https://docs.airnowapi.org
+Cost: Free
+Authentication: Free API Key Required
+________________
+
+
+1. What This API Gives Us
+* Real-time Air Quality Index (AQI)
+* Pollutant data (PM2.5, Ozone, etc.)
+* AQI category (Good, Moderate, Unhealthy, etc.)
+* Forecast data (usually next-day)
+This API is U.S.-focused and works very well for mobile apps.
+________________
+
+
+2. Step 1 – Get an API Key
+1. Register at https://docs.airnowapi.org
+2. Receive a free API key
+3. Use that key in all requests
+No OAuth required. Just include the key in the URL.
+________________
+
+
+3. Option A – Using ZIP Code (Easiest Method)
+Use this when:
+* User types in their ZIP code
+* We already have ZIP stored in user profile
+URL Format
+https://www.airnowapi.org/aq/observation/zipCode/current/
+?format=application/json
+&zipCode=ZIP_HERE
+&distance=25
+&API_KEY=YOUR_API_KEY
+Example (Boise, ID 83709)
+https://www.airnowapi.org/aq/observation/zipCode/current/?format=application/json&zipCode=83709&distance=25&API_KEY=YOUR_API_KEY
+What "distance=25" Means
+Search within 25 miles of the ZIP code for a monitoring station.
+________________
+
+
+4. Option B – Using Mobile GPS (Recommended for Mobile App)
+Use this when:
+* App automatically detects device location
+* We want best user experience
+First, get device latitude and longitude.
+URL Format
+https://www.airnowapi.org/aq/observation/latLong/current/
+?format=application/json
+&latitude=LAT_VALUE
+&longitude=LON_VALUE
+&distance=25
+&API_KEY=YOUR_API_KEY
+Example (Boise Coordinates)
+https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=43.615&longitude=-116.202&distance=25&API_KEY=YOUR_API_KEY
+________________
+
+
+5. Example Response (What We Get Back)
+The API returns JSON like this:
+[
+ {
+   "DateObserved": "2026-02-23",
+   "HourObserved": 12,
+   "ReportingArea": "Boise",
+   "StateCode": "ID",
+   "ParameterName": "PM2.5",
+   "AQI": 42,
+   "Category": {
+     "Number": 1,
+     "Name": "Good"
+   }
+ }
+]
+Important fields for UI:
+* AQI (numeric value)
+* Category.Name (Good, Moderate, etc.)
+* ParameterName (pollutant)
+* ReportingArea
+________________
+
+
+6. Forecast Endpoint (Optional)
+ZIP Forecast:
+https://www.airnowapi.org/aq/forecast/zipCode/?format=application/json&zipCode=83709&date=2026-02-23&distance=25&API_KEY=YOUR_API_KEY
+Lat/Long Forecast:
+https://www.airnowapi.org/aq/forecast/latLong/?format=application/json&latitude=43.615&longitude=-116.202&date=2026-02-23&distance=25&API_KEY=YOUR_API_KEY
+Forecasts are usually next-day AQI predictions.
+________________
+
+
+7. Recommended App Flow
+Best Mobile Experience:
+1. Ask for location permission
+2. Get latitude & longitude
+3. Call latLong endpoint
+4. Display AQI + category
+5. Optionally load forecast
+Backup Plan:
+If location permission denied → ask user for ZIP code.
+________________
+
+
+8. Important Notes
+* API is completely free
+* Must include API key in every request
+* Do not hardcode API key directly in public mobile app (use backend proxy if possible)
+* Avoid refreshing more than every 10–30 minutes
