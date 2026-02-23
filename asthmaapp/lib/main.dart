@@ -128,6 +128,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 });
               },
             ),
+            const SizedBox(height:20),
+            ElevatedButton(
+              onPressed: _selectedValue == null
+                ? null
+                : () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('You selected $_selectedValue'),
+                    ),
+                  );
+                },
+              child: const Text('Submit'),
+            ),
           ],
         ),
       ),
