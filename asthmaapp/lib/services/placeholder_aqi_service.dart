@@ -4,11 +4,10 @@ import '../models/aqi_result.dart';
 import 'aqi_service.dart';
 
 /// Placeholder implementation: no real API calls.
-/// Replace with EPA AirNow integration (CurrentObservationsByZip/query).
+/// Replace with EPA AirNow (by ZIP or by latitude/longitude).
 class PlaceholderAqiService implements AqiService {
   PlaceholderAqiService({this.simulateFailure = false});
 
-  /// Set true to test failed-API UI (e.g. in tests or debug).
   final bool simulateFailure;
 
   @override
@@ -25,12 +24,30 @@ class PlaceholderAqiService implements AqiService {
         message: 'Please enter a ZIP code or city on the home screen.',
       );
     }
-    // Stub data for UI development. Replace with real API response parsing.
     return AqiSuccess(
       data: AqiData(
         aqiValue: 42,
         category: 'Good',
         locationLabel: locationInput.trim(),
+      ),
+      lastUpdated: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<AqiResult> getAqiForCoordinates(double latitude, double longitude) async {
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    if (simulateFailure) {
+      return const AqiFailure(
+        message: 'Unable to load air quality data. Check your connection and try again.',
+        lastKnown: null,
+      );
+    }
+    return AqiSuccess(
+      data: AqiData(
+        aqiValue: 38,
+        category: 'Good',
+        locationLabel: 'Current location',
       ),
       lastUpdated: DateTime.now(),
     );
