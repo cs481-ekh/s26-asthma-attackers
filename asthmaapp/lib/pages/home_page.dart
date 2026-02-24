@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/recommendation_args.dart';
+import '../pages/recommendation_page.dart';
 import '../widgets/symptom_modal.dart';
 
 /// Main entry page: symptom selection and location input.
@@ -40,11 +41,20 @@ class _HomePageState extends State<HomePage> {
       );
       return;
     }
+    final location = _locationController.text.trim();
+    if (location.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a ZIP code or city to get air quality.'),
+        ),
+      );
+      return;
+    }
     Navigator.of(context).pushNamed(
-      '/recommendation',
+      RecommendationPage.routeName,
       arguments: RecommendationArgs(
         symptomLevel: _symptomLevel!,
-        location: _locationController.text.trim(),
+        location: location,
       ),
     );
   }

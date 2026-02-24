@@ -1,21 +1,75 @@
 import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
+import '../models/aqi_result.dart';
 import '../models/recommendation_args.dart';
+import '../services/aqi_service.dart';
+import '../services/placeholder_aqi_service.dart';
 import '../widgets/symptom_modal.dart';
 
 /// Displays activity recommendation based on symptom level and AQI.
-/// Layout includes: AQI display, color-coded guidance, explanation, disclaimer (3.1.5, 3.1.6).
-class RecommendationPage extends StatelessWidget {
-  const RecommendationPage({super.key});
+/// Fetches AQI using user-provided location (ZIP/city); displays most recent
+/// or handles failed API calls with retry and optional last-known AQI.
+class RecommendationPage extends StatefulWidget {
+  const RecommendationPage({
+    super.key,
+    this.aqiService,
+  });
 
   static const String routeName = '/recommendation';
 
+  final AqiService? aqiService;
+
+  @override
+  State<RecommendationPage> createState() => _RecommendationPageState();
+}
+
+class _RecommendationPageState extends State<RecommendationPage> {
+  AqiService get _aqiService =>
+      widget.aqiService ?? PlaceholderAqiService();
+
+  RecommendationArgs? _args;
+  AqiResult? _aqiResult;
+  bool _loading = false;
+
+  String get _location => _args?.location ?? '';
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is RecommendationArgs && args != _args) {
+      _args = args;
+      if (args.location.trim().isNotEmpty) {
+        _fetchAqi();
+      } else {
+        setState(() {
+          _aqiResult = const AqiFailure(
+            message: 'Please enter a ZIP code or city on the home screen to see air quality.',
+          );
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchAqi() async {
+    if (_location.trim().isEmpty) return;
+    setState(() {
+      _loading = true;
+      _aqiResult = null;
+    });
+    final result = await _aqiService.getAqiForLocation(_location);
+    if (mounted) {
+      setState(() {
+        _loading = false;
+        _aqiResult = result;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)?.settings.arguments;
-    final symptomLevel = args is RecommendationArgs ? args.symptomLevel : null;
-    final location = args is RecommendationArgs ? args.location : '';
+    final symptomLevel = _args?.symptomLevel;
 
     return Scaffold(
       appBar: AppBar(
@@ -31,19 +85,19 @@ class RecommendationPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // AQI display area (stub: real AQI integration later)
-              _AqiCard(location: location),
+              _AqiCard(
+                location: _location,
+                aqiResult: _aqiResult,
+                loading: _loading,
+                onRetry: _fetchAqi,
+              ),
               const SizedBox(height: 20),
-              // Recommendation card (color-coded placeholder)
               _RecommendationCard(symptomLevel: symptomLevel),
               const SizedBox(height: 20),
-              // Explanation area
               _ExplanationCard(symptomLevel: symptomLevel),
               const SizedBox(height: 20),
-              // Disclaimer (3.1.6)
               _DisclaimerCard(),
               const SizedBox(height: 16),
-              // Next-day guidance outline (3.1.4)
               OutlinedButton.icon(
                 onPressed: () {
                   // TODO: Open next-day guidance modal or navigate to next-day view
@@ -60,9 +114,17 @@ class RecommendationPage extends StatelessWidget {
 }
 
 class _AqiCard extends StatelessWidget {
-  const _AqiCard({required this.location});
+  const _AqiCard({
+    required this.location,
+    required this.aqiResult,
+    required this.loading,
+    required this.onRetry,
+  });
 
   final String location;
+  final AqiResult? aqiResult;
+  final bool loading;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -85,22 +147,89 @@ class _AqiCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            // Placeholder for AQI value and category
-            Text(
-              location.isEmpty ? 'Enter location on home to see AQI' : 'Location: $location',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'AQI: —  •  Category: —',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade700,
+            if (loading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    SizedBox(width: 12),
+                    Text('Loading air quality…'),
+                  ],
+                ),
+              )
+            else if (aqiResult == null)
+              Text(
+                location.isEmpty
+                    ? 'Enter location on home to see AQI'
+                    : 'Location: $location',
+                style: Theme.of(context).textTheme.bodyMedium,
+              )
+            else
+              ...switch (aqiResult!) {
+                AqiSuccess(data: final data, lastUpdated: final lastUpdated) => [
+                  Text(
+                    'Location: ${data.locationLabel}',
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
-            ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'AQI: ${data.aqiValue}  •  ${data.category}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  if (lastUpdated != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Updated ${_formatTime(lastUpdated)}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey.shade600,
+                          ),
+                    ),
+                  ],
+                ],
+                AqiFailure(message: final message, lastKnown: final lastKnown) => [
+                  Text(
+                    message,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                  ),
+                  if (lastKnown != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      'Last known: AQI ${lastKnown.aqiValue} (${lastKnown.category})',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey.shade700,
+                          ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: onRetry,
+                    icon: const Icon(Icons.refresh, size: 18),
+                    label: const Text('Retry'),
+                  ),
+                ],
+              },
           ],
         ),
       ),
     );
+  }
+
+  static String _formatTime(DateTime dt) {
+    final now = DateTime.now();
+    final diff = now.difference(dt);
+    if (diff.inMinutes < 1) return 'just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
+    if (diff.inHours < 24) return '${diff.inHours} hr ago';
+    return '${diff.inDays} day(s) ago';
   }
 }
 
@@ -111,8 +240,7 @@ class _RecommendationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Placeholder color; real logic will drive color and text (3.1.5).
-    const placeholderColor = Color(0xFF4CAF50); // green placeholder
+    const placeholderColor = Color(0xFF4CAF50);
     return Card(
       color: placeholderColor.withValues(alpha: 0.12),
       child: Padding(
