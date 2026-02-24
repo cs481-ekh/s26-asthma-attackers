@@ -1,0 +1,16 @@
+A: No repiratory or Asthma Symptoms
+    - No coughing, wheezing, or shortness of breath
+    - No chest tightness
+    - No need for rescue inhaler
+    - Able to exercise and sleep normally
+B: Few Respiratory or Asthma Symptoms
+    - Coughing or wheezing once in a while
+    - Mild shortness of breath with exercise
+    - Symptoms occur few times per week
+    - May occasionally need rescue inhaler
+C: Daily repiratory or Asthma Symptoms
+    - Coughing, wheezing, or chest tightness Daily
+    - Shortness of breath with normal activities
+    - Frequent use of rescue inhaler
+    - Symptoms that disturb sleep
+    - Limited exercise
