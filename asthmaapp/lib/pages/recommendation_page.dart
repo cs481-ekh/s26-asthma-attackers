@@ -40,12 +40,14 @@ class _RecommendationPageState extends State<RecommendationPage> {
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is RecommendationArgs && args != _args) {
       _args = args;
-      if (args.location.trim().isNotEmpty) {
+      if (args.useCoordinates) {
+        _fetchAqi();
+      } else if (args.location.trim().isNotEmpty) {
         _fetchAqi();
       } else {
         setState(() {
           _aqiResult = const AqiFailure(
-            message: 'Please enter a ZIP code or city on the home screen to see air quality.',
+            message: 'Please use "Use my location" or enter a ZIP code or city on the home screen to see air quality.',
           );
         });
       }
@@ -53,12 +55,22 @@ class _RecommendationPageState extends State<RecommendationPage> {
   }
 
   Future<void> _fetchAqi() async {
-    if (_location.trim().isEmpty) return;
+    final args = _args;
+    if (args == null) return;
     setState(() {
       _loading = true;
       _aqiResult = null;
     });
-    final result = await _aqiService.getAqiForLocation(_location);
+    final AqiResult result;
+    if (args.useCoordinates && args.latitude != null && args.longitude != null) {
+      result = await _aqiService.getAqiForCoordinates(args.latitude!, args.longitude!);
+    } else if (args.location.trim().isNotEmpty) {
+      result = await _aqiService.getAqiForLocation(args.location);
+    } else {
+      result = const AqiFailure(
+        message: 'No location provided. Use "Use my location" or enter a ZIP or city.',
+      );
+    }
     if (mounted) {
       setState(() {
         _loading = false;
