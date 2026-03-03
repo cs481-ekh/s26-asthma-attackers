@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/services/slide_rule_service.dart';
-import '../lib/widgets/symptom_modal.dart';
+import 'package:asthmaapp/services/slide_rule_service.dart';
+import 'package:asthmaapp/widgets/symptom_modal.dart';
 
 void main() {
   group('SlideRuleService.getRecommendation', () {
