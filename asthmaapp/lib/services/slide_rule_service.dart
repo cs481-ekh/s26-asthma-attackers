@@ -1,7 +1,8 @@
+import '../widgets/symptom_modal.dart';
+
 /// Slide Rule Decision Matrix API
 /// Returns recommendation (OK/NR) based on AQI color, activity level, and symptom level.
-// Import SymptomLevel from symptom_modal.dart
-import '../widgets/symptom_modal.dart';
+/// Import SymptomLevel from symptom_modal.dart
 
 enum AqiColor {
   green,
