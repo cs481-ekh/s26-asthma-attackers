@@ -61,7 +61,7 @@ void main() {
         }
         tearDownAll(() {
           if (testCount == totalTests) {
-            print('All tests passed for ${color.name[0].toUpperCase()}${color.name.substring(1)}');
+            //print('All tests passed for ${color.name[0].toUpperCase()}${color.name.substring(1)}');
           }
         });
       });
