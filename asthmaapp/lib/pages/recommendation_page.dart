@@ -4,7 +4,7 @@ import '../app_theme.dart';
 import '../models/aqi_result.dart';
 import '../models/recommendation_args.dart';
 import '../services/aqi_service.dart';
-import '../services/placeholder_aqi_service.dart';
+import '../services/airnow_aqi_service.dart';
 import '../widgets/symptom_modal.dart';
 
 /// Displays activity recommendation based on symptom level and AQI.
@@ -26,7 +26,7 @@ class RecommendationPage extends StatefulWidget {
 
 class _RecommendationPageState extends State<RecommendationPage> {
   AqiService get _aqiService =>
-      widget.aqiService ?? PlaceholderAqiService();
+      widget.aqiService ?? AirNowAqiService();
 
   RecommendationArgs? _args;
   AqiResult? _aqiResult;
