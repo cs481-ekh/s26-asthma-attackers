@@ -342,11 +342,11 @@ class _RecommendationCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _activityRow("Light level activity", lightRecommendation),
+                  _activityRow("Light activity", lightRecommendation),
                   const SizedBox(height: 6),
-                  _activityRow("Moderate level activity", moderateRecommendation),
+                  _activityRow("Medium activity", moderateRecommendation),
                   const SizedBox(height: 6),
-                  _activityRow("Vigorous level activity", vigorousRecommendation),
+                  _activityRow("Vigorous activity", vigorousRecommendation),
                 ],
               ),
           ],
