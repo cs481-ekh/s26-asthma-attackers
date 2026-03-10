@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app_theme.dart';
 import 'pages/home_page.dart';
 import 'pages/recommendation_page.dart';
 
-void main() {
+void main() async {
+  await dotenv.load();
   runApp(const AsthmaActivityAdvisorApp());
 }
 
