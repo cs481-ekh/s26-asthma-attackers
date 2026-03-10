@@ -26,7 +26,7 @@ import 'aqi_service.dart';
 /// - **Multi-station handling**: Prioritizes data from primary reporting area when multiple stations are found
 ///
 /// ## Error Handling
-/// - Network timeouts (10-second limit)
+/// - Network timeouts (20-second limit for AirNow; 12s for geocoding)
 /// - Invalid API keys or parameters
 /// - No data available for location
 /// - Malformed API responses
@@ -91,12 +91,13 @@ class AirNowAqiService implements AqiService {
   static const String _forecastCoordsUrl =
       'https://www.airnowapi.org/aq/forecast/latLong/';
 
-  /// Timeout duration for all API requests.
-  static const Duration _timeout = Duration(seconds: 10);
+  /// Timeout duration for AirNow API requests (coordinate/ZIP can be slow).
+  static const Duration _timeout = Duration(seconds: 20);
 
   @override
   Future<AqiResult> getAqiForLocation(String locationInput) async {
     /// Retrieves current air quality data for a location: ZIP code or city/place name.
+    /// City names are geocoded to coordinates, then AQI is fetched via coordinate API.
     ///
     /// [locationInput] - ZIP code (e.g. "83702") or city/place name (e.g. "Boise", "New York").
     /// City names are geocoded to coordinates via OpenStreetMap Nominatim, then AQI
@@ -154,7 +155,7 @@ class AirNowAqiService implements AqiService {
       }
 
       return const AqiFailure(
-        message: 'No current AQI observation or forecast available for this location. Please try again.',
+        message: 'No air quality data for this area. Try a nearby city or ZIP code.',
       );
     } on TimeoutException {
       return const AqiFailure(
@@ -247,21 +248,24 @@ class AirNowAqiService implements AqiService {
         return const AqiFailure(message: 'Invalid API key.');
       }
       if (response.statusCode == 400) {
-        return const AqiFailure(message: 'Invalid ZIP code format.');
+        return const AqiFailure(
+          message: 'We couldn\'t find air quality data for that ZIP code. Try a nearby city or ZIP, or check the number.',
+        );
       }
       if (response.statusCode != 200) {
         return AqiFailure(message: 'API error: ${response.statusCode}');
       }
-      
+
       if (response.body.isEmpty) {
-        return const AqiFailure(message: 'No observation data returned.');
+        return null;
       }
 
-      // Parse and return the observation result
       final result = _parseObservationResponse(response.body, zipCode);
       return result;
     } on TimeoutException {
-      return const AqiFailure(message: 'Observation request timed out.');
+      return const AqiFailure(
+        message: 'Request timed out. The air quality service may be slow—tap Retry to try again.',
+      );
     } catch (e) {
       return AqiFailure(message: 'Observation fetch error: $e');
     }
@@ -296,13 +300,15 @@ class AirNowAqiService implements AqiService {
       }
 
       if (response.body.isEmpty) {
-        return const AqiFailure(message: 'No observation data returned.');
+        return null;
       }
 
       final label = locationLabel ?? 'Latitude: $latitude, Longitude: $longitude';
       return _parseObservationResponse(response.body, label);
     } on TimeoutException {
-      return const AqiFailure(message: 'Observation request timed out.');
+      return const AqiFailure(
+        message: 'Request timed out. The air quality service may be slow—tap Retry to try again.',
+      );
     } catch (e) {
       return AqiFailure(message: 'Observation fetch error: $e');
     }
@@ -337,14 +343,16 @@ class AirNowAqiService implements AqiService {
       return const AqiFailure(message: 'Invalid API key.');
     }
     if (response.statusCode == 400) {
-      return const AqiFailure(message: 'Invalid ZIP code format.');
+      return const AqiFailure(
+        message: 'We couldn\'t find air quality data for that ZIP code. Try a nearby city or ZIP, or check the number.',
+      );
     }
     if (response.statusCode != 200) {
       return AqiFailure(message: 'Server error: ${response.statusCode}');
     }
 
     if (response.body.isEmpty) {
-      return const AqiFailure(message: 'No forecast data available for this location.');
+      return null;
     }
 
     return _parseForecastResponse(response.body, zipCode);
@@ -383,7 +391,7 @@ class AirNowAqiService implements AqiService {
     }
 
     if (response.body.isEmpty) {
-      return const AqiFailure(message: 'No forecast data available for this location.');
+      return null;
     }
 
     final label = locationLabel ?? 'Latitude: $latitude, Longitude: $longitude';
@@ -408,7 +416,7 @@ class AirNowAqiService implements AqiService {
         headers: {
           'User-Agent': 'AsthmaActivityAdvisor/1.0 (educational; air quality app)',
         },
-      ).timeout(const Duration(seconds: 8));
+      ).timeout(const Duration(seconds: 12));
 
       if (response.statusCode != 200) return null;
 
