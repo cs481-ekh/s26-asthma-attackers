@@ -109,6 +109,31 @@ class SlideRuleService {
   }
 }
 
+AqiColor mapAqiCategory(String category) {
+  switch (category.toLowerCase()) {
+    case 'good':
+      return AqiColor.green;
+
+    case 'moderate':
+      return AqiColor.yellow;
+
+    case 'unhealthy for sensitive groups':
+      return AqiColor.orange;
+
+    case 'unhealthy':
+      return AqiColor.red;
+
+    case 'very unhealthy':
+      return AqiColor.purple;
+
+    case 'hazardous':
+      return AqiColor.maroon;
+
+    default:
+      return AqiColor.yellow;
+  }
+}
+
 //final result = SlideRuleService.getRecommendation(
 //   aqiColor: AqiColor.yellow, // or the AQI color you get from your logic
 //   activityLevel: ActivityLevel.light, // or the user’s chosen activity level
