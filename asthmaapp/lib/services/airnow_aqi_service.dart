@@ -120,7 +120,7 @@ class AirNowAqiService implements AqiService {
       );
     }
 
-    if (_apiKey == null || _apiKey!.isEmpty) {
+    if (_apiKey == null || _apiKey.isEmpty) {
       return const AqiFailure(
         message: 'API key not configured.',
       );
@@ -175,7 +175,7 @@ class AirNowAqiService implements AqiService {
       );
     }
 
-    if (_apiKey == null || _apiKey!.isEmpty) {
+    if (_apiKey == null || _apiKey.isEmpty) {
       return const AqiFailure(
         message: 'API key not configured.',
       );
