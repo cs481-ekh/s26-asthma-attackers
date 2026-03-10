@@ -87,19 +87,19 @@ class _RecommendationPageState extends State<RecommendationPage> {
           _lightRecommendation = SlideRuleService.getRecommendation(
             aqiColor: aqiColor,
             activityLevel: ActivityLevel.light,
-            symptomLevel: _args!.symptomLevel!,
+            symptomLevel: _args!.symptomLevel,
           );
 
           _moderateRecommendation = SlideRuleService.getRecommendation(
             aqiColor: aqiColor,
             activityLevel: ActivityLevel.moderate,
-            symptomLevel: _args!.symptomLevel!,
+            symptomLevel: _args!.symptomLevel,
           );
 
           _vigorousRecommendation = SlideRuleService.getRecommendation(
             aqiColor: aqiColor,
             activityLevel: ActivityLevel.vigorous,
-            symptomLevel: _args!.symptomLevel!,
+            symptomLevel: _args!.symptomLevel,
           );
         }
 
