@@ -26,7 +26,7 @@ import 'aqi_service.dart';
 /// - **Multi-station handling**: Prioritizes data from primary reporting area when multiple stations are found
 ///
 /// ## Error Handling
-/// - Network timeouts (10-second limit)
+/// - Network timeouts (20-second limit for AirNow; 12s for geocoding)
 /// - Invalid API keys or parameters
 /// - No data available for location
 /// - Malformed API responses
@@ -91,8 +91,8 @@ class AirNowAqiService implements AqiService {
   static const String _forecastCoordsUrl =
       'https://www.airnowapi.org/aq/forecast/latLong/';
 
-  /// Timeout duration for all API requests.
-  static const Duration _timeout = Duration(seconds: 10);
+  /// Timeout duration for AirNow API requests (coordinate/ZIP can be slow).
+  static const Duration _timeout = Duration(seconds: 20);
 
   @override
   Future<AqiResult> getAqiForLocation(String locationInput) async {
@@ -256,7 +256,9 @@ class AirNowAqiService implements AqiService {
       final result = _parseObservationResponse(response.body, zipCode);
       return result;
     } on TimeoutException {
-      return const AqiFailure(message: 'Observation request timed out.');
+      return const AqiFailure(
+        message: 'Request timed out. The air quality service may be slow—tap Retry to try again.',
+      );
     } catch (e) {
       return AqiFailure(message: 'Observation fetch error: $e');
     }
@@ -296,7 +298,9 @@ class AirNowAqiService implements AqiService {
       final label = locationLabel ?? 'Latitude: $latitude, Longitude: $longitude';
       return _parseObservationResponse(response.body, label);
     } on TimeoutException {
-      return const AqiFailure(message: 'Observation request timed out.');
+      return const AqiFailure(
+        message: 'Request timed out. The air quality service may be slow—tap Retry to try again.',
+      );
     } catch (e) {
       return AqiFailure(message: 'Observation fetch error: $e');
     }
@@ -398,7 +402,7 @@ class AirNowAqiService implements AqiService {
         headers: {
           'User-Agent': 'AsthmaActivityAdvisor/1.0 (educational; air quality app)',
         },
-      ).timeout(const Duration(seconds: 8));
+      ).timeout(const Duration(seconds: 12));
 
       if (response.statusCode != 200) return null;
 
