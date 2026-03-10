@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../models/recommendation_args.dart';
 import '../pages/recommendation_page.dart';
+import '../utils/location_validator.dart';
 import '../widgets/symptom_modal.dart';
 
 /// Main entry page: symptom selection and location input.
@@ -24,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   double? _longitude;
   bool _locationLoading = false;
   String? _locationError;
+  String? _locationValidationError;
 
   @override
   void dispose() {
@@ -39,9 +42,15 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  bool get _hasLocation =>
-      _useDeviceLocation && _latitude != null && _longitude != null ||
-      _locationController.text.trim().isNotEmpty;
+  /// On web, entry field is required (ZIP or city). On mobile, device location OR entry field.
+  bool get _hasLocation {
+    final entryText = _locationController.text.trim();
+    final entryValid = entryText.isNotEmpty && LocationValidator.isValid(entryText);
+    if (kIsWeb) {
+      return entryValid;
+    }
+    return (_useDeviceLocation && _latitude != null && _longitude != null) || entryValid;
+  }
 
   Future<void> _useMyLocation() async {
     setState(() {
@@ -112,9 +121,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onLocationTextChanged() {
-    if (_locationController.text.trim().isNotEmpty) {
-      setState(() => _useDeviceLocation = false);
-    }
+    setState(() {
+      if (_locationController.text.trim().isNotEmpty) {
+        _useDeviceLocation = false;
+      }
+      _locationValidationError = null;
+    });
   }
 
   void _getRecommendation() {
@@ -126,10 +138,25 @@ class _HomePageState extends State<HomePage> {
       );
       return;
     }
+
+    final entryText = _locationController.text.trim();
+    final usingEntryField = !_useDeviceLocation || _latitude == null || _longitude == null;
+    if (usingEntryField) {
+      final validationError = LocationValidator.validate(entryText);
+      if (validationError != null) {
+        setState(() => _locationValidationError = validationError);
+        return;
+      }
+    }
+
     if (!_hasLocation) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Use "Use my location" or enter a ZIP code or city to get air quality.'),
+        SnackBar(
+          content: Text(
+            kIsWeb
+                ? 'Enter a ZIP code or city name to get air quality.'
+                : 'Use "Use my location" or enter a ZIP code or city to get air quality.',
+          ),
         ),
       );
       return;
@@ -137,7 +164,9 @@ class _HomePageState extends State<HomePage> {
 
     final locationLabel = _useDeviceLocation && _latitude != null && _longitude != null
         ? 'Current location'
-        : _locationController.text.trim();
+        : entryText;
+
+    setState(() => _locationValidationError = null);
 
     Navigator.of(context).pushNamed(
       RecommendationPage.routeName,
@@ -218,13 +247,15 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Use your device location or enter a ZIP code or city.',
+                        kIsWeb
+                            ? 'Enter a ZIP code or city name (required on web).'
+                            : 'Use your device location or enter a ZIP code or city.',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.grey.shade700,
                             ),
                       ),
                       const SizedBox(height: 12),
-                      if (_useDeviceLocation && _latitude != null && _longitude != null)
+                      if (!kIsWeb && _useDeviceLocation && _latitude != null && _longitude != null)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Row(
@@ -251,25 +282,28 @@ class _HomePageState extends State<HomePage> {
                           controller: _locationController,
                           focusNode: _locationFocus,
                           onChanged: (_) => _onLocationTextChanged(),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: 'e.g. 83702 or Boise',
-                            prefixIcon: Icon(Icons.location_on_outlined),
+                            prefixIcon: const Icon(Icons.location_on_outlined),
+                            errorText: _locationValidationError,
                           ),
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => _getRecommendation(),
                         ),
-                        const SizedBox(height: 12),
-                        OutlinedButton.icon(
-                          onPressed: _locationLoading ? null : _useMyLocation,
-                          icon: _locationLoading
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Icon(Icons.my_location, size: 20),
-                          label: Text(_locationLoading ? 'Getting location…' : 'Use my location'),
-                        ),
+                        if (!kIsWeb) ...[
+                          const SizedBox(height: 12),
+                          OutlinedButton.icon(
+                            onPressed: _locationLoading ? null : _useMyLocation,
+                            icon: _locationLoading
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.my_location, size: 20),
+                            label: Text(_locationLoading ? 'Getting location…' : 'Use my location'),
+                          ),
+                        ],
                       ],
                       if (_locationError != null) ...[
                         const SizedBox(height: 10),

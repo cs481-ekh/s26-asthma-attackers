@@ -98,6 +98,13 @@ class AirNowAqiService implements AqiService {
   Future<AqiResult> getAqiForLocation(String locationInput) async {
     /// Retrieves current air quality data for a location: ZIP code or city/place name.
     /// City names are geocoded to coordinates, then AQI is fetched via coordinate API.
+    ///
+    /// [locationInput] - ZIP code (e.g. "83702") or city/place name (e.g. "Boise", "New York").
+    /// City names are geocoded to coordinates via OpenStreetMap Nominatim, then AQI
+    /// is fetched using the coordinate-based AirNow API.
+    ///
+    /// Returns [AqiSuccess] with current AQI data if available, or [AqiFailure]
+    /// with an error message if the request fails or no data is available.
     final trimmed = locationInput.trim();
 
     if (simulateFailure) {
@@ -120,33 +127,33 @@ class AirNowAqiService implements AqiService {
 
     try {
       if (LocationValidator.isValidZipCode(trimmed)) {
+        // ZIP code path: use AirNow ZIP endpoints directly
         final observationResult = await _fetchObservationForZip(trimmed);
         if (observationResult != null) return observationResult;
         final forecastResult = await _fetchForecastForZip(trimmed);
         if (forecastResult != null) return forecastResult;
-        return const AqiFailure(
-          message: 'No air quality data for this ZIP code. Try a nearby city or ZIP, or check the number.',
+      } else {
+        // City/place path: geocode to coordinates, then use coordinate endpoints
+        final coords = await _geocodePlace(trimmed);
+        if (coords == null) {
+          return const AqiFailure(
+            message: 'Could not find that city or place. Try a ZIP code or a different spelling.',
+          );
+        }
+        final observationResult = await _fetchObservationForCoords(
+          coords.latitude,
+          coords.longitude,
+          locationLabel: trimmed,
         );
+        if (observationResult != null) return observationResult;
+        final forecastResult = await _fetchForecastForCoords(
+          coords.latitude,
+          coords.longitude,
+          locationLabel: trimmed,
+        );
+        if (forecastResult != null) return forecastResult;
       }
 
-      final coords = await _geocodePlace(trimmed);
-      if (coords == null) {
-        return const AqiFailure(
-          message: 'Could not find that city or place. Try a ZIP code or a different spelling.',
-        );
-      }
-      final observationResult = await _fetchObservationForCoords(
-        coords.latitude,
-        coords.longitude,
-        locationLabel: trimmed,
-      );
-      if (observationResult != null) return observationResult;
-      final forecastResult = await _fetchForecastForCoords(
-        coords.latitude,
-        coords.longitude,
-        locationLabel: trimmed,
-      );
-      if (forecastResult != null) return forecastResult;
       return const AqiFailure(
         message: 'No air quality data for this area. Try a nearby city or ZIP code.',
       );
@@ -265,7 +272,8 @@ class AirNowAqiService implements AqiService {
   }
 
   /// Fetches current AQI observations for geographic coordinates.
-  /// [locationLabel] - Optional display name (e.g. city name when geocoded).
+  ///
+  /// [locationLabel] - Optional display name for the result (e.g. city name when geocoded).
   Future<AqiResult?> _fetchObservationForCoords(
     double latitude,
     double longitude, {
@@ -351,7 +359,8 @@ class AirNowAqiService implements AqiService {
   }
 
   /// Fetches AQI forecast for coordinates (fallback when observations unavailable).
-  /// [locationLabel] - Optional display name (e.g. city name when geocoded).
+  ///
+  /// [locationLabel] - Optional display name for the result (e.g. city name when geocoded).
   Future<AqiResult?> _fetchForecastForCoords(
     double latitude,
     double longitude, {
@@ -390,12 +399,17 @@ class AirNowAqiService implements AqiService {
   }
 
   /// Geocodes a place name (e.g. city) to coordinates using OpenStreetMap Nominatim.
-  /// Appends ", USA" to bias US results for AirNow coverage. Returns null if not found.
+  /// Appends ", USA" to bias US results for AirNow coverage.
+  /// Returns null if the place cannot be found or the request fails.
   Future<({double latitude, double longitude})?> _geocodePlace(String placeName) async {
     try {
       final query = placeName.contains(',') ? placeName : '$placeName, USA';
       final uri = Uri.parse('https://nominatim.openstreetmap.org/search').replace(
-        queryParameters: {'q': query, 'format': 'json', 'limit': '1'},
+        queryParameters: {
+          'q': query,
+          'format': 'json',
+          'limit': '1',
+        },
       );
       final response = await _httpClient.get(
         uri,
