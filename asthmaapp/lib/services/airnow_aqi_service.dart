@@ -170,19 +170,10 @@ class AirNowAqiService implements AqiService {
 
   @override
   Future<AqiResult> getAqiForCoordinates(
-      double latitude, double longitude) async {
-    /// Retrieves current air quality data for geographic coordinates.
-    ///
-    /// [latitude] - Latitude in decimal degrees (-90.0 to 90.0)
-    /// [longitude] - Longitude in decimal degrees (-180.0 to 180.0)
-    ///
-    /// Returns [AqiSuccess] with current AQI data if available, or [AqiFailure]
-    /// with an error message if the request fails or no data is available.
-    ///
-    /// The method first tries to get current observations, then falls back to
-    /// today's forecast if observations are unavailable. It searches within a
-    /// 25-mile radius of the provided coordinates and prioritizes PM2.5 data
-    /// from the primary reporting area when multiple monitoring stations are found.
+    double latitude,
+    double longitude, {
+    String? locationLabel,
+  }) async {
     if (simulateFailure) {
       return const AqiFailure(
         message: 'Unable to load air quality data. Check your connection and try again.',
@@ -196,29 +187,30 @@ class AirNowAqiService implements AqiService {
     }
 
     try {
-      // Try observation endpoint first for current AQI
-      final observationResult = await _fetchObservationForCoords(latitude, longitude);
-      if (observationResult != null) {
-        return observationResult;
-      }
+      final observationResult = await _fetchObservationForCoords(
+        latitude,
+        longitude,
+        locationLabel: locationLabel,
+      );
+      if (observationResult != null) return observationResult;
 
-      // Fallback to forecast if observations are unavailable
-      final forecastResult = await _fetchForecastForCoords(latitude, longitude);
-      if (forecastResult != null) {
-        return forecastResult;
-      }
+      final forecastResult = await _fetchForecastForCoords(
+        latitude,
+        longitude,
+        locationLabel: locationLabel,
+      );
+      if (forecastResult != null) return forecastResult;
 
-      // Both observation and forecast failed
       return const AqiFailure(
-        message: 'No current AQI observation or forecast available for this location. Please try again.',
+        message: 'No air quality data for your location. Try a nearby city or ZIP code.',
       );
     } on TimeoutException {
       return const AqiFailure(
-        message: 'Request timed out. Check your connection and try again.',
+        message: 'Request timed out. The air quality service may be slow—tap Retry to try again.',
       );
     } catch (e) {
       return AqiFailure(
-        message: 'Error: $e',
+        message: 'Could not load air quality for your location. Tap Retry or try entering a city or ZIP.',
       );
     }
   }
@@ -272,8 +264,7 @@ class AirNowAqiService implements AqiService {
   }
 
   /// Fetches current AQI observations for geographic coordinates.
-  ///
-  /// [locationLabel] - Optional display name for the result (e.g. city name when geocoded).
+  /// [locationLabel] - Optional display name (e.g. "Current location" from geolocation).
   Future<AqiResult?> _fetchObservationForCoords(
     double latitude,
     double longitude, {

@@ -60,6 +60,91 @@ void main() {
     expect(find.textContaining('Moderate'), findsOneWidget);
   });
 
+  testWidgets('Geolocation: AQI and location displayed correctly for device location',
+      (WidgetTester tester) async {
+    final stubService = _StubAqiService();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: ElevatedButton(
+              onPressed: () => Navigator.of(context).pushNamed(
+                RecommendationPage.routeName,
+                arguments: RecommendationArgs(
+                  symptomLevel: SymptomLevel.b,
+                  location: 'Current location',
+                  latitude: 43.6,
+                  longitude: -116.2,
+                ),
+              ),
+              child: const Text('Go to recommendation'),
+            ),
+          ),
+        ),
+        onGenerateRoute: (settings) {
+          if (settings.name == RecommendationPage.routeName) {
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (_) => RecommendationPage(aqiService: stubService),
+            );
+          }
+          return null;
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go to recommendation'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Location: Current location'), findsOneWidget);
+    expect(find.textContaining('AQI:'), findsOneWidget);
+    expect(find.textContaining('Good'), findsOneWidget);
+  });
+
+  testWidgets('Geolocation: error shown and Retry available when API fails for location',
+      (WidgetTester tester) async {
+    final failingService = _FailingAqiService();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: ElevatedButton(
+              onPressed: () => Navigator.of(context).pushNamed(
+                RecommendationPage.routeName,
+                arguments: RecommendationArgs(
+                  symptomLevel: SymptomLevel.a,
+                  location: 'Current location',
+                  latitude: 45.0,
+                  longitude: -120.0,
+                ),
+              ),
+              child: const Text('Go to recommendation'),
+            ),
+          ),
+        ),
+        onGenerateRoute: (settings) {
+          if (settings.name == RecommendationPage.routeName) {
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (_) => RecommendationPage(aqiService: failingService),
+            );
+          }
+          return null;
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go to recommendation'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('No air quality data for your location'), findsOneWidget);
+    expect(find.text('Retry'), findsOneWidget);
+  });
+
   testWidgets('Unknown city or ZIP shows clear error and retry',
       (WidgetTester tester) async {
     final failingService = _FailingAqiService();
@@ -115,14 +200,18 @@ class _StubAqiService implements AqiService {
   }
 
   @override
-  Future<AqiResult> getAqiForCoordinates(double latitude, double longitude) async {
+  Future<AqiResult> getAqiForCoordinates(
+    double latitude,
+    double longitude, {
+    String? locationLabel,
+  }) async {
     return AqiSuccess(
-      data: const AqiData(
-        aqiValue: 55,
-        category: 'Moderate',
-        locationLabel: 'Current location',
+      data: AqiData(
+        aqiValue: 40,
+        category: 'Good',
+        locationLabel: locationLabel ?? 'Current location',
       ),
-      lastUpdated: null,
+      lastUpdated: DateTime.now(),
     );
   }
 }
@@ -136,9 +225,13 @@ class _FailingAqiService implements AqiService {
   }
 
   @override
-  Future<AqiResult> getAqiForCoordinates(double latitude, double longitude) async {
+  Future<AqiResult> getAqiForCoordinates(
+    double latitude,
+    double longitude, {
+    String? locationLabel,
+  }) async {
     return const AqiFailure(
-      message: 'No air quality data for this area. Try a nearby city or ZIP code.',
+      message: 'No air quality data for your location. Try a nearby city or ZIP code.',
     );
   }
 }

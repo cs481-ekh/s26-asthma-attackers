@@ -35,7 +35,14 @@ abstract class AqiService {
   /// The service will search for monitoring stations within a reasonable
   /// radius of the coordinates and return the most relevant AQI data.
   ///
+  /// [locationLabel] is an optional display name (e.g. "Current location" when
+  /// from device geolocation) used in the returned AQI result.
+  ///
   /// Returns [AqiSuccess] with current AQI information, or [AqiFailure]
   /// if no data is available for the coordinates or the request fails.
-  Future<AqiResult> getAqiForCoordinates(double latitude, double longitude);
+  Future<AqiResult> getAqiForCoordinates(
+    double latitude,
+    double longitude, {
+    String? locationLabel,
+  });
 }

@@ -63,7 +63,11 @@ class _RecommendationPageState extends State<RecommendationPage> {
     });
     final AqiResult result;
     if (args.useCoordinates && args.latitude != null && args.longitude != null) {
-      result = await _aqiService.getAqiForCoordinates(args.latitude!, args.longitude!);
+      result = await _aqiService.getAqiForCoordinates(
+        args.latitude!,
+        args.longitude!,
+        locationLabel: args.location,
+      );
     } else if (args.location.trim().isNotEmpty) {
       result = await _aqiService.getAqiForLocation(args.location);
     } else {
