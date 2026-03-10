@@ -6,6 +6,7 @@ import '../models/recommendation_args.dart';
 import '../services/aqi_service.dart';
 import '../services/airnow_aqi_service.dart';
 import '../widgets/symptom_modal.dart';
+import '../services/slide_rule_service.dart';
 
 /// Displays activity recommendation based on symptom level and AQI.
 /// Fetches AQI using user-provided location (ZIP/city); displays most recent
@@ -31,6 +32,10 @@ class _RecommendationPageState extends State<RecommendationPage> {
   RecommendationArgs? _args;
   AqiResult? _aqiResult;
   bool _loading = false;
+
+  Recommendation? _lightRecommendation;
+  Recommendation? _moderateRecommendation;
+  Recommendation? _vigorousRecommendation;
 
   String get _location => _args?.location ?? '';
 
@@ -75,6 +80,29 @@ class _RecommendationPageState extends State<RecommendationPage> {
       setState(() {
         _loading = false;
         _aqiResult = result;
+
+        if (result is AqiSuccess && _args?.symptomLevel != null) {
+          final aqiColor = mapAqiCategory(result.data.category);
+
+          _lightRecommendation = SlideRuleService.getRecommendation(
+            aqiColor: aqiColor,
+            activityLevel: ActivityLevel.light,
+            symptomLevel: _args!.symptomLevel!,
+          );
+
+          _moderateRecommendation = SlideRuleService.getRecommendation(
+            aqiColor: aqiColor,
+            activityLevel: ActivityLevel.moderate,
+            symptomLevel: _args!.symptomLevel!,
+          );
+
+          _vigorousRecommendation = SlideRuleService.getRecommendation(
+            aqiColor: aqiColor,
+            activityLevel: ActivityLevel.vigorous,
+            symptomLevel: _args!.symptomLevel!,
+          );
+        }
+
       });
     }
   }
@@ -104,7 +132,12 @@ class _RecommendationPageState extends State<RecommendationPage> {
                 onRetry: _fetchAqi,
               ),
               const SizedBox(height: 20),
-              _RecommendationCard(symptomLevel: symptomLevel),
+              _RecommendationCard(
+                symptomLevel: symptomLevel,
+                lightRecommendation: _lightRecommendation,
+                moderateRecommendation: _moderateRecommendation,
+                vigorousRecommendation: _vigorousRecommendation,
+              ),
               const SizedBox(height: 20),
               _ExplanationCard(symptomLevel: symptomLevel),
               const SizedBox(height: 20),
@@ -246,9 +279,36 @@ class _AqiCard extends StatelessWidget {
 }
 
 class _RecommendationCard extends StatelessWidget {
-  const _RecommendationCard({this.symptomLevel});
+  const _RecommendationCard({
+    this.symptomLevel,
+    this.lightRecommendation,
+    this.moderateRecommendation,
+    this.vigorousRecommendation,
+  });
 
   final SymptomLevel? symptomLevel;
+  final Recommendation? lightRecommendation;
+  final Recommendation? moderateRecommendation;
+  final Recommendation? vigorousRecommendation;
+
+  Widget _activityRow(String label, Recommendation? result) {
+    if (result == null) {
+      return Text("$label: loading...");
+    }
+
+    final isOk = result == Recommendation.ok;
+
+    return Row(
+      children: [
+        Icon(
+          isOk ? Icons.check_circle : Icons.cancel,
+          color: isOk ? Colors.green : Colors.red,
+        ),
+        const SizedBox(width: 8),
+        Text("$label: ${isOk ? "Recommended" : "Not recommended"}"),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -267,12 +327,28 @@ class _RecommendationCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 8),
-            Text(
-              symptomLevel != null
-                  ? 'Maximum allowable activity will appear here based on AQI and symptom level (${symptomLevel!.id}).'
-                  : 'Recommendation will appear here once AQI is available.',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            // Text(
+            //   symptomLevel != null
+            //       ? 'Maximum allowable activity will appear here based on AQI and symptom level (${symptomLevel!.id}).'
+            //       : 'Recommendation will appear here once AQI is available.',
+            //   style: Theme.of(context).textTheme.bodyLarge,
+            // ),
+            if (symptomLevel == null)
+              Text(
+                'Recommendation will appear here once AQI is available.',
+                style: Theme.of(context).textTheme.bodyLarge,
+              )
+            else
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _activityRow("Light activity", lightRecommendation),
+                  const SizedBox(height: 6),
+                  _activityRow("Moderate activity", moderateRecommendation),
+                  const SizedBox(height: 6),
+                  _activityRow("Vigorous activity", vigorousRecommendation),
+                ],
+              ),
           ],
         ),
       ),
