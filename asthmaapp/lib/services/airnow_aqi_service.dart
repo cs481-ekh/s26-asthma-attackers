@@ -455,53 +455,45 @@ class AirNowAqiService implements AqiService {
         return const AqiFailure(message: 'No observation data available.');
       }
 
-      // Parse observation data with intelligent pollutant selection
-      // The API may return multiple monitoring stations within the search radius
+      // Use records so we can carry reporting area / state alongside each entry.
       String? primaryReportingArea;
-      List<AqiSuccess> pm25Results = [];
-      List<AqiSuccess> pm25PrimaryResults = [];
-      List<AqiSuccess> otherResults = [];
+      List<({int aqi, String category, String? reportingArea, String? stateCode})> pm25Results = [];
+      List<({int aqi, String category, String? reportingArea, String? stateCode})> pm25PrimaryResults = [];
+      List<({int aqi, String category, String? reportingArea, String? stateCode})> otherResults = [];
 
       for (int i = 0; i < jsonData.length; i++) {
         final entry = jsonData[i];
-        if (entry is! Map<String, dynamic>) {
-          continue;
-        }
+        if (entry is! Map<String, dynamic>) continue;
 
         final map = entry;
         final aqi = map['AQI'] as int?;
         final parameterName = map['ParameterName'] as String?;
         final reportingArea = map['ReportingArea'] as String?;
+        final stateCode = map['StateCode'] as String?;
 
         if (aqi != null && aqi >= 0) {
           final category = map['Category'] as Map<String, dynamic>?;
           final categoryName = category?['Name'] as String?;
 
           if (categoryName != null && categoryName.isNotEmpty) {
-            final success = AqiSuccess(
-              data: AqiData(
-                aqiValue: aqi,
-                category: categoryName,
-                locationLabel: locationLabel,
-              ),
-              lastUpdated: DateTime.now(),
+            final record = (
+              aqi: aqi,
+              category: categoryName,
+              reportingArea: reportingArea,
+              stateCode: stateCode,
             );
 
-            // Identify primary reporting area from first valid entry
-            // This helps prioritize data from the main monitoring station
             if (primaryReportingArea == null && reportingArea != null) {
               primaryReportingArea = reportingArea;
             }
 
-            // Categorize results by pollutant type and location priority
             if (parameterName == 'PM2.5') {
-              pm25Results.add(success);
-              // Track PM2.5 from primary area separately for highest priority
+              pm25Results.add(record);
               if (reportingArea == primaryReportingArea) {
-                pm25PrimaryResults.add(success);
+                pm25PrimaryResults.add(record);
               }
             } else {
-              otherResults.add(success);
+              otherResults.add(record);
             }
           }
         }
@@ -511,14 +503,26 @@ class AirNowAqiService implements AqiService {
       // 1. PM2.5 from primary reporting area (most relevant)
       // 2. PM2.5 from any nearby area
       // 3. Other pollutants as fallback
+      ({int aqi, String category, String? reportingArea, String? stateCode})? best;
       if (pm25PrimaryResults.isNotEmpty) {
-        return pm25PrimaryResults.first;
+        best = pm25PrimaryResults.first;
+      } else if (pm25Results.isNotEmpty) {
+        best = pm25Results.first;
+      } else if (otherResults.isNotEmpty) {
+        best = otherResults.first;
       }
-      if (pm25Results.isNotEmpty) {
-        return pm25Results.first;
-      }
-      if (otherResults.isNotEmpty) {
-        return otherResults.first;
+
+      if (best != null) {
+        return AqiSuccess(
+          data: AqiData(
+            aqiValue: best.aqi,
+            category: best.category,
+            locationLabel: locationLabel,
+            reportingArea: best.reportingArea,
+            stateCode: best.stateCode,
+          ),
+          lastUpdated: DateTime.now(),
+        );
       }
 
       return const AqiFailure(message: 'No valid observation data available.');
@@ -563,6 +567,8 @@ class AirNowAqiService implements AqiService {
         final dateForecast = map['DateForecast'] as String?;
         final parameterName = map['ParameterName'] as String?;
         final aqi = map['AQI'] as int?;
+        final reportingArea = map['ReportingArea'] as String?;
+        final stateCode = map['StateCode'] as String?;
 
         if (dateForecast == todayString && parameterName == 'PM2.5' && aqi != null && aqi >= 0) {
           final category = map['Category'] as Map<String, dynamic>?;
@@ -574,6 +580,8 @@ class AirNowAqiService implements AqiService {
                 aqiValue: aqi,
                 category: categoryName,
                 locationLabel: locationLabel,
+                reportingArea: reportingArea,
+                stateCode: stateCode,
               ),
               lastUpdated: DateTime.now(),
             );
@@ -588,6 +596,8 @@ class AirNowAqiService implements AqiService {
         final map = entry;
         final dateForecast = map['DateForecast'] as String?;
         final aqi = map['AQI'] as int?;
+        final reportingArea = map['ReportingArea'] as String?;
+        final stateCode = map['StateCode'] as String?;
 
         if (dateForecast == todayString && aqi != null && aqi >= 0) {
           final category = map['Category'] as Map<String, dynamic>?;
@@ -599,6 +609,8 @@ class AirNowAqiService implements AqiService {
                 aqiValue: aqi,
                 category: categoryName,
                 locationLabel: locationLabel,
+                reportingArea: reportingArea,
+                stateCode: stateCode,
               ),
               lastUpdated: DateTime.now(),
             );
@@ -612,6 +624,8 @@ class AirNowAqiService implements AqiService {
 
         final map = entry;
         final aqi = map['AQI'] as int?;
+        final reportingArea = map['ReportingArea'] as String?;
+        final stateCode = map['StateCode'] as String?;
 
         if (aqi != null && aqi >= 0) {
           final category = map['Category'] as Map<String, dynamic>?;
@@ -623,6 +637,8 @@ class AirNowAqiService implements AqiService {
                 aqiValue: aqi,
                 category: categoryName,
                 locationLabel: locationLabel,
+                reportingArea: reportingArea,
+                stateCode: stateCode,
               ),
               lastUpdated: DateTime.now(),
             );

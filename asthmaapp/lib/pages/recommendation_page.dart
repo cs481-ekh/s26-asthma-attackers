@@ -5,6 +5,7 @@ import '../models/aqi_result.dart';
 import '../models/recommendation_args.dart';
 import '../services/aqi_service.dart';
 import '../services/airnow_aqi_service.dart';
+import '../widgets/airnow_forecast_widget.dart';
 import '../widgets/symptom_modal.dart';
 import '../services/slide_rule_service.dart';
 
@@ -38,6 +39,31 @@ class _RecommendationPageState extends State<RecommendationPage> {
   Recommendation? _vigorousRecommendation;
 
   String get _location => _args?.location ?? '';
+
+  /// Tries to extract city and state from a location string.
+  ///
+  /// Handles these formats:
+  ///  - "City, ST"  → city + 2-letter state abbreviation
+  ///  - "City"      → city only (state is null)
+  ///
+  /// Returns null for ZIP codes (5 digits) and "Current location" strings
+  /// since the AirNow widget requires a city name, not a ZIP or coordinates.
+  static ({String city, String? state})? _parseCityState(String location) {
+    final trimmed = location.trim();
+    if (trimmed.isEmpty || trimmed == 'Current location') return null;
+    // Reject plain ZIP codes (5-digit or ZIP+4)
+    if (RegExp(r'^\d{5}(-\d{4})?$').hasMatch(trimmed)) return null;
+    // Match "City, ST" with a 2-letter state abbreviation
+    final match = RegExp(r'^(.+?),\s*([A-Za-z]{2})$').firstMatch(trimmed);
+    if (match != null) {
+      return (
+        city: match.group(1)!.trim(),
+        state: match.group(2)!.toUpperCase(),
+      );
+    }
+    // Plain city name with no state
+    return (city: trimmed, state: null);
+  }
 
   @override
   void didChangeDependencies() {
@@ -111,6 +137,63 @@ class _RecommendationPageState extends State<RecommendationPage> {
     }
   }
 
+  /// Builds the air quality section: the embedded AirNow forecast widget when
+  /// a parseable city name is available, or the plain [_AqiCard] fallback for
+  /// ZIP codes and GPS-only locations.
+  Widget _buildAqiDisplay() {
+    // 1. Try to parse city/state directly from the location string (typed city names).
+    var cityState = _parseCityState(_location);
+
+    // 2. If that returned null (GPS "Current location" or ZIP code), use the
+    //    ReportingArea/StateCode that the AirNow API already returned.
+    if (cityState == null && _aqiResult is AqiSuccess) {
+      final data = (_aqiResult as AqiSuccess).data;
+      final area = data.reportingArea;
+      if (area != null && area.isNotEmpty) {
+        cityState = (city: area, state: data.stateCode);
+      }
+    }
+
+    if (cityState != null) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.air, color: AppTheme.primaryTeal, size: 28),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Air quality',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: AirNowForecastWidget(
+                  city: cityState.city,
+                  state: cityState.state,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    // Fallback for ZIP codes or GPS (no city/state available for the widget URL)
+    return _AqiCard(
+      location: _location,
+      aqiResult: _aqiResult,
+      loading: _loading,
+      onRetry: _fetchAqi,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final symptomLevel = _args?.symptomLevel;
@@ -129,12 +212,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _AqiCard(
-                location: _location,
-                aqiResult: _aqiResult,
-                loading: _loading,
-                onRetry: _fetchAqi,
-              ),
+              _buildAqiDisplay(),
               const SizedBox(height: 20),
               _RecommendationCard(
                 symptomLevel: symptomLevel,
