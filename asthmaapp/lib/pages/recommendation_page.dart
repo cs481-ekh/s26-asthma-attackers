@@ -40,6 +40,34 @@ class _RecommendationPageState extends State<RecommendationPage> {
 
   String get _location => _args?.location ?? '';
 
+  ({
+    Recommendation light,
+    Recommendation moderate,
+    Recommendation vigorous,
+  }) _recommendationsForCategory(
+    String category,
+    SymptomLevel symptomLevel,
+  ) {
+    final aqiColor = mapAqiCategory(category);
+    return (
+      light: SlideRuleService.getRecommendation(
+        aqiColor: aqiColor,
+        activityLevel: ActivityLevel.light,
+        symptomLevel: symptomLevel,
+      ),
+      moderate: SlideRuleService.getRecommendation(
+        aqiColor: aqiColor,
+        activityLevel: ActivityLevel.moderate,
+        symptomLevel: symptomLevel,
+      ),
+      vigorous: SlideRuleService.getRecommendation(
+        aqiColor: aqiColor,
+        activityLevel: ActivityLevel.vigorous,
+        symptomLevel: symptomLevel,
+      ),
+    );
+  }
+
   /// Tries to extract city and state from a location string.
   ///
   /// Handles these formats:
@@ -112,29 +140,34 @@ class _RecommendationPageState extends State<RecommendationPage> {
         _aqiResult = result;
 
         if (result is AqiSuccess && _args?.symptomLevel != null) {
-          final aqiColor = mapAqiCategory(result.data.category);
-
-          _lightRecommendation = SlideRuleService.getRecommendation(
-            aqiColor: aqiColor,
-            activityLevel: ActivityLevel.light,
-            symptomLevel: _args!.symptomLevel,
+          final recommendations = _recommendationsForCategory(
+            result.data.category,
+            _args!.symptomLevel,
           );
 
-          _moderateRecommendation = SlideRuleService.getRecommendation(
-            aqiColor: aqiColor,
-            activityLevel: ActivityLevel.moderate,
-            symptomLevel: _args!.symptomLevel,
-          );
-
-          _vigorousRecommendation = SlideRuleService.getRecommendation(
-            aqiColor: aqiColor,
-            activityLevel: ActivityLevel.vigorous,
-            symptomLevel: _args!.symptomLevel,
-          );
+          _lightRecommendation = recommendations.light;
+          _moderateRecommendation = recommendations.moderate;
+          _vigorousRecommendation = recommendations.vigorous;
         }
 
       });
     }
+  }
+
+  void _openNextDayGuidance() {
+    final args = _args;
+    final symptomLevel = args?.symptomLevel;
+    if (args == null || symptomLevel == null) return;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _NextDayGuidanceSheet(
+        aqiService: _aqiService,
+        args: args,
+        recommendationsForCategory: _recommendationsForCategory,
+      ),
+    );
   }
 
   /// Builds the air quality section: the embedded AirNow forecast widget when
@@ -154,7 +187,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
       }
     }
 
-    if (cityState != null) {
+    if (cityState != null && _aqiResult is AqiSuccess) {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -226,11 +259,164 @@ class _RecommendationPageState extends State<RecommendationPage> {
               _DisclaimerCard(),
               const SizedBox(height: 16),
               OutlinedButton.icon(
-                onPressed: () {
-                  // TODO: Open next-day guidance modal or navigate to next-day view
-                },
+                onPressed: _openNextDayGuidance,
                 icon: const Icon(Icons.calendar_today_outlined),
                 label: const Text('View next-day activity guidance'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NextDayGuidanceSheet extends StatefulWidget {
+  const _NextDayGuidanceSheet({
+    required this.aqiService,
+    required this.args,
+    required this.recommendationsForCategory,
+  });
+
+  final AqiService aqiService;
+  final RecommendationArgs args;
+  final ({
+    Recommendation light,
+    Recommendation moderate,
+    Recommendation vigorous,
+  }) Function(String category, SymptomLevel symptomLevel)
+      recommendationsForCategory;
+
+  @override
+  State<_NextDayGuidanceSheet> createState() => _NextDayGuidanceSheetState();
+}
+
+class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
+  AqiResult? _nextDayResult;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNextDayForecast();
+  }
+
+  Future<void> _fetchNextDayForecast() async {
+    setState(() {
+      _loading = true;
+      _nextDayResult = null;
+    });
+
+    final args = widget.args;
+    final AqiResult result;
+    if (args.useCoordinates && args.latitude != null && args.longitude != null) {
+      result = await widget.aqiService.getForecastForCoordinates(
+        args.latitude!,
+        args.longitude!,
+        locationLabel: args.location,
+        dayOffset: 1,
+      );
+    } else {
+      result = await widget.aqiService.getForecastForLocation(
+        args.location,
+        dayOffset: 1,
+      );
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _loading = false;
+      _nextDayResult = result;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final symptomLevel = widget.args.symptomLevel;
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: 20 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Next-day activity guidance',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Forecast-based recommendation for tomorrow.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              if (_loading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_nextDayResult is AqiFailure)
+                _AqiCard(
+                  location: widget.args.location,
+                  aqiResult: _nextDayResult,
+                  loading: false,
+                  onRetry: _fetchNextDayForecast,
+                )
+              else if (_nextDayResult case AqiSuccess(:final data)) ...[
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Forecast AQI: ${data.aqiValue} (${data.category})',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Location: ${data.locationLabel}',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (symptomLevel != null)
+                  Builder(
+                    builder: (_) {
+                      final recommendations = widget.recommendationsForCategory(
+                        data.category,
+                        symptomLevel,
+                      );
+                      return _RecommendationCard(
+                        symptomLevel: symptomLevel,
+                        lightRecommendation: recommendations.light,
+                        moderateRecommendation: recommendations.moderate,
+                        vigorousRecommendation: recommendations.vigorous,
+                      );
+                    },
+                  ),
+              ],
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Close'),
+                ),
               ),
             ],
           ),

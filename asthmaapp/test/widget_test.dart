@@ -184,6 +184,54 @@ void main() {
     expect(find.textContaining('Could not find that city or place'), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
   });
+
+  testWidgets('Next-day guidance shows forecast-based recommendations',
+      (WidgetTester tester) async {
+    final stubService = _StubAqiService();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: ElevatedButton(
+              onPressed: () => Navigator.of(context).pushNamed(
+                RecommendationPage.routeName,
+                arguments: RecommendationArgs(
+                  symptomLevel: SymptomLevel.a,
+                  location: '83702',
+                ),
+              ),
+              child: const Text('Go to recommendation'),
+            ),
+          ),
+        ),
+        onGenerateRoute: (settings) {
+          if (settings.name == RecommendationPage.routeName) {
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (_) => RecommendationPage(aqiService: stubService),
+            );
+          }
+          return null;
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go to recommendation'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final nextDayButton = find.text('View next-day activity guidance');
+    await tester.ensureVisible(nextDayButton);
+    await tester.tap(nextDayButton);
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Next-day activity guidance'), findsOneWidget);
+    expect(find.text('Forecast AQI: 160 (Unhealthy)'), findsOneWidget);
+    expect(find.text('Medium activity: Not recommended'), findsOneWidget);
+    expect(find.text('Vigorous activity: Not recommended'), findsOneWidget);
+  });
 }
 
 class _StubAqiService implements AqiService {
@@ -214,6 +262,38 @@ class _StubAqiService implements AqiService {
       lastUpdated: DateTime.now(),
     );
   }
+
+  @override
+  Future<AqiResult> getForecastForLocation(
+    String locationInput, {
+    int dayOffset = 1,
+  }) async {
+    return AqiSuccess(
+      data: AqiData(
+        aqiValue: 160,
+        category: 'Unhealthy',
+        locationLabel: locationInput,
+      ),
+      lastUpdated: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<AqiResult> getForecastForCoordinates(
+    double latitude,
+    double longitude, {
+    String? locationLabel,
+    int dayOffset = 1,
+  }) async {
+    return AqiSuccess(
+      data: AqiData(
+        aqiValue: 160,
+        category: 'Unhealthy',
+        locationLabel: locationLabel ?? 'Current location',
+      ),
+      lastUpdated: DateTime.now(),
+    );
+  }
 }
 
 class _FailingAqiService implements AqiService {
@@ -232,6 +312,28 @@ class _FailingAqiService implements AqiService {
   }) async {
     return const AqiFailure(
       message: 'No air quality data for your location. Try a nearby city or ZIP code.',
+    );
+  }
+
+  @override
+  Future<AqiResult> getForecastForLocation(
+    String locationInput, {
+    int dayOffset = 1,
+  }) async {
+    return const AqiFailure(
+      message: 'No forecast data for this area. Try a nearby city or ZIP code.',
+    );
+  }
+
+  @override
+  Future<AqiResult> getForecastForCoordinates(
+    double latitude,
+    double longitude, {
+    String? locationLabel,
+    int dayOffset = 1,
+  }) async {
+    return const AqiFailure(
+      message: 'No forecast data for your location. Try a nearby city or ZIP code.',
     );
   }
 }
