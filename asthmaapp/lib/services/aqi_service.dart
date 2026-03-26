@@ -45,4 +45,26 @@ abstract class AqiService {
     double longitude, {
     String? locationLabel,
   });
+
+  /// Retrieves forecast air quality data for a text-based location.
+  ///
+  /// [dayOffset] is the number of days from today:
+  /// - `0` for today's forecast
+  /// - `1` for next-day forecast
+  Future<AqiResult> getForecastForLocation(
+    String locationInput, {
+    int dayOffset = 1,
+  });
+
+  /// Retrieves forecast air quality data for geographic coordinates.
+  ///
+  /// [dayOffset] is the number of days from today:
+  /// - `0` for today's forecast
+  /// - `1` for next-day forecast
+  Future<AqiResult> getForecastForCoordinates(
+    double latitude,
+    double longitude, {
+    String? locationLabel,
+    int dayOffset = 1,
+  });
 }
