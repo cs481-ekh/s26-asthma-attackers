@@ -143,7 +143,12 @@ class _RecommendationPageState extends State<RecommendationPage> {
                 vigorousRecommendation: _vigorousRecommendation,
               ),
               const SizedBox(height: 20),
-              _ExplanationCard(symptomLevel: symptomLevel),
+              _ExplanationCard(
+                symptomLevel: symptomLevel,
+                aqiColor: _aqiResult is AqiSuccess
+                  ? mapAqiCategory((_aqiResult as AqiSuccess).data.category)
+                  : null,
+              ),
               const SizedBox(height: 20),
               _DisclaimerCard(),
               const SizedBox(height: 16),
@@ -361,9 +366,39 @@ class _RecommendationCard extends StatelessWidget {
 }
 
 class _ExplanationCard extends StatelessWidget {
-  const _ExplanationCard({this.symptomLevel});
+  const _ExplanationCard({
+    this.symptomLevel,
+    this.aqiColor,
+  });
 
   final SymptomLevel? symptomLevel;
+  final AqiColor? aqiColor;
+
+  String _getExplanation() {
+    if (symptomLevel == null || aqiColor == null) {
+      return 'Explanation will appear here after you get a recommendation.';
+    }
+
+    switch (aqiColor) {
+      case AqiColor.green:
+        return 'Air quality is good. Most people, even with symptoms, can safely perform outdoor activities';
+
+      case AqiColor.yellow:
+        return 'Air quality is acceptable. Sensitive individuals may experience mild symptoms, so consider limited prolonged exertion.';
+
+      case AqiColor.orange:
+        return 'Air quality is unhealthy for sensitive groups. Symptoms may worsen, so reduce outdoor activity intensity and duration.';
+      
+      case AqiColor.red:
+        return 'Air quality is unhealthy. It is recommended to avoid strenuous outdoor activities, especially if experiencing symptoms.';
+
+      case AqiColor.purple:
+        return 'Air quality is very unhealthy. Outdoor activities should be avoided due to high risk of symptom aggravation.';
+    
+      default:
+        return 'Unable to determine recommendation';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -381,9 +416,7 @@ class _ExplanationCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              symptomLevel != null
-                  ? 'Brief explanation referencing current AQI and symptom level (${symptomLevel!.id}) will appear here.'
-                  : 'Explanation will appear here after you get a recommendation.',
+              _getExplanation(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey.shade800,
                   ),
