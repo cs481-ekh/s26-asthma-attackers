@@ -394,21 +394,20 @@ class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                if (symptomLevel != null)
-                  Builder(
-                    builder: (_) {
-                      final recommendations = widget.recommendationsForCategory(
-                        data.category,
-                        symptomLevel,
-                      );
-                      return _RecommendationCard(
-                        symptomLevel: symptomLevel,
-                        lightRecommendation: recommendations.light,
-                        moderateRecommendation: recommendations.moderate,
-                        vigorousRecommendation: recommendations.vigorous,
-                      );
-                    },
-                  ),
+                Builder(
+                  builder: (_) {
+                    final recommendations = widget.recommendationsForCategory(
+                      data.category,
+                      symptomLevel,
+                    );
+                    return _RecommendationCard(
+                      symptomLevel: symptomLevel,
+                      lightRecommendation: recommendations.light,
+                      moderateRecommendation: recommendations.moderate,
+                      vigorousRecommendation: recommendations.vigorous,
+                    );
+                  },
+                ),
               ],
               const SizedBox(height: 12),
               Align(
