@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 
 import '../app_theme.dart';
 import '../models/aqi_result.dart';
@@ -57,6 +59,16 @@ class _RecommendationPageState extends State<RecommendationPage> {
         });
       }
     }
+  }
+
+  Future<void> _openAqiDetails() async {
+    final uri = Uri.parse('https://www.airnow.gov/aqi/aqi-basics/');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _openRecommendationInfo() async {
+    final uri = Uri.parse('https://www.boisestate.edu/research-resilience/resources-hazards/air-quality-and-smoke/');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _fetchAqi() async {
@@ -134,6 +146,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
                 aqiResult: _aqiResult,
                 loading: _loading,
                 onRetry: _fetchAqi,
+                onMoreDetails: _openAqiDetails,
               ),
               const SizedBox(height: 20),
               _RecommendationCard(
@@ -148,6 +161,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
                 aqiColor: _aqiResult is AqiSuccess
                   ? mapAqiCategory((_aqiResult as AqiSuccess).data.category)
                   : null,
+                onLearnMore: _openRecommendationInfo,
               ),
               const SizedBox(height: 20),
               _DisclaimerCard(),
@@ -173,12 +187,14 @@ class _AqiCard extends StatelessWidget {
     required this.aqiResult,
     required this.loading,
     required this.onRetry,
+    required this.onMoreDetails,
   });
 
   final String location;
   final AqiResult? aqiResult;
   final bool loading;
   final VoidCallback onRetry;
+  final VoidCallback onMoreDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -231,11 +247,27 @@ class _AqiCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    'AQI: ${data.aqiValue}  •  ${data.category}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                  RichText(
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                      children: [
+                        TextSpan(
+                          text: 'AQI: ${data.aqiValue}  •  ${data.category} ',
                         ),
+                        TextSpan(
+                          text: 'More details.',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = onMoreDetails, // ignore (we fix below)
+                        ),
+                      ],
+                    ),
                   ),
                   if (lastUpdated != null) ...[
                     const SizedBox(height: 4),
@@ -369,10 +401,12 @@ class _ExplanationCard extends StatelessWidget {
   const _ExplanationCard({
     this.symptomLevel,
     this.aqiColor,
+    required this.onLearnMore,
   });
 
   final SymptomLevel? symptomLevel;
   final AqiColor? aqiColor;
+  final VoidCallback onLearnMore;
 
   String _getExplanation() {
     if (symptomLevel == null || aqiColor == null) {
@@ -415,11 +449,27 @@ class _ExplanationCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 8),
-            Text(
-              _getExplanation(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade800,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _getExplanation(),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey.shade800,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: onLearnMore,
+                  child: Text(
+                    'More information and resources.',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
+                ),
+              ],
             ),
           ],
         ),

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 
 import '../models/recommendation_args.dart';
 import '../pages/recommendation_page.dart';
@@ -33,6 +35,11 @@ class _HomePageState extends State<HomePage> {
     _locationController.dispose();
     _locationFocus.dispose();
     super.dispose();
+  }
+
+  Future<void> _openAqiInfo() async {
+    final uri = Uri.parse('https://www.airnow.gov/?city=Boise&state=ID&country=USA');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _openSymptomModal() async {
@@ -246,13 +253,28 @@ class _HomePageState extends State<HomePage> {
                             ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        kIsWeb
-                            ? 'Enter a ZIP code or city name (required on web).'
-                            : 'Use your device location or enter a ZIP code or city.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey.shade700,
+                      RichText(
+                        text: TextSpan(
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.grey.shade700,
+                              ),
+                          children: [
+                            TextSpan(
+                              text: kIsWeb
+                                  ? 'Enter a ZIP code or city name (required on web). '
+                                  : 'Use your device location or enter a ZIP code or city. ',
                             ),
+                            TextSpan(
+                              text: 'Learn more about AQI.',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = _openAqiInfo,
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 12),
                       if (!kIsWeb && _useDeviceLocation && _latitude != null && _longitude != null)
