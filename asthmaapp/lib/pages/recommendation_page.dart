@@ -178,6 +178,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
         aqiService: _aqiService,
         args: args,
         recommendationsForCategory: _recommendationsForCategory,
+        onMoreDetails: _openAqiDetails,
       ),
     );
   }
@@ -295,8 +296,10 @@ class _NextDayGuidanceSheet extends StatefulWidget {
     required this.aqiService,
     required this.args,
     required this.recommendationsForCategory,
+    required this.onMoreDetails,
   });
 
+  final VoidCallback onMoreDetails;
   final AqiService aqiService;
   final RecommendationArgs args;
   final ({
@@ -389,7 +392,7 @@ class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
                   aqiResult: _nextDayResult,
                   loading: false,
                   onRetry: _fetchNextDayForecast,
-                  onMoreDetails: _openAqiDetails,
+                  onMoreDetails: widget.onMoreDetails,
                 )
               else if (_nextDayResult case AqiSuccess(:final data)) ...[
                 Card(
