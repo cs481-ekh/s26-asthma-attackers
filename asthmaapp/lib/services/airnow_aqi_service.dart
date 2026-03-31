@@ -206,11 +206,115 @@ class AirNowAqiService implements AqiService {
       );
     } on TimeoutException {
       return const AqiFailure(
-        message: 'Request timed out. The air quality service may be slow—tap Retry to try again.',
+        message: 'Request timed out. The air quality service may be slow. Tap Retry to try again.',
       );
     } catch (e) {
       return AqiFailure(
         message: 'Could not load air quality for your location. Tap Retry or try entering a city or ZIP.',
+      );
+    }
+  }
+
+  @override
+  Future<AqiResult> getForecastForLocation(
+    String locationInput, {
+    int dayOffset = 1,
+  }) async {
+    final trimmed = locationInput.trim();
+
+    if (simulateFailure) {
+      return const AqiFailure(
+        message: 'Unable to load air quality data. Check your connection and try again.',
+      );
+    }
+
+    if (trimmed.isEmpty) {
+      return const AqiFailure(
+        message: 'Please enter a ZIP code or city on the home screen.',
+      );
+    }
+
+    if (_apiKey == null || _apiKey.isEmpty) {
+      return const AqiFailure(
+        message: 'API key not configured.',
+      );
+    }
+
+    try {
+      if (LocationValidator.isValidZipCode(trimmed)) {
+        final forecastResult = await _fetchForecastForZip(
+          trimmed,
+          dayOffset: dayOffset,
+        );
+        if (forecastResult != null) return forecastResult;
+      } else {
+        final coords = await _geocodePlace(trimmed);
+        if (coords == null) {
+          return const AqiFailure(
+            message: 'Could not find that city or place. Try a ZIP code or a different spelling.',
+          );
+        }
+        final forecastResult = await _fetchForecastForCoords(
+          coords.latitude,
+          coords.longitude,
+          locationLabel: trimmed,
+          dayOffset: dayOffset,
+        );
+        if (forecastResult != null) return forecastResult;
+      }
+
+      return const AqiFailure(
+        message: 'No forecast data for this area. Try a nearby city or ZIP code.',
+      );
+    } on TimeoutException {
+      return const AqiFailure(
+        message: 'Request timed out. Check your connection and try again.',
+      );
+    } catch (e) {
+      return AqiFailure(
+        message: 'Error: $e',
+      );
+    }
+  }
+
+  @override
+  Future<AqiResult> getForecastForCoordinates(
+    double latitude,
+    double longitude, {
+    String? locationLabel,
+    int dayOffset = 1,
+  }) async {
+    if (simulateFailure) {
+      return const AqiFailure(
+        message: 'Unable to load air quality data. Check your connection and try again.',
+      );
+    }
+
+    if (_apiKey == null || _apiKey.isEmpty) {
+      return const AqiFailure(
+        message: 'API key not configured.',
+      );
+    }
+
+    try {
+      final forecastResult = await _fetchForecastForCoords(
+        latitude,
+        longitude,
+        locationLabel: locationLabel,
+        dayOffset: dayOffset,
+      );
+      if (forecastResult != null) return forecastResult;
+
+      return const AqiFailure(
+        message: 'No forecast data for your location. Try a nearby city or ZIP code.',
+      );
+    } on TimeoutException {
+      return const AqiFailure(
+        message: 'Request timed out. The air quality service may be slow-tap Retry to try again.',
+      );
+    } catch (e) {
+      return AqiFailure(
+        message: 'Could not load forecast for your location. Tap Retry or try entering a city or ZIP.',
       );
     }
   }
@@ -313,10 +417,12 @@ class AirNowAqiService implements AqiService {
   ///
   /// Returns [AqiSuccess] if valid forecast data is found, [AqiFailure] if
   /// the request fails or no data is available, or null if parsing fails.
-  Future<AqiResult?> _fetchForecastForZip(String zipCode) async {
-    final now = DateTime.now();
-    final dateString =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+  Future<AqiResult?> _fetchForecastForZip(
+    String zipCode, {
+    int dayOffset = 0,
+  }) async {
+    final targetDate = DateTime.now().add(Duration(days: dayOffset));
+    final dateString = _formatDate(targetDate);
 
     final uri = Uri.parse(_forecastZipUrl).replace(
       queryParameters: {
@@ -346,7 +452,11 @@ class AirNowAqiService implements AqiService {
       return null;
     }
 
-    return _parseForecastResponse(response.body, zipCode);
+    return _parseForecastResponse(
+      response.body,
+      zipCode,
+      targetDate: targetDate,
+    );
   }
 
   /// Fetches AQI forecast for coordinates (fallback when observations unavailable).
@@ -356,10 +466,10 @@ class AirNowAqiService implements AqiService {
     double latitude,
     double longitude, {
     String? locationLabel,
+    int dayOffset = 0,
   }) async {
-    final now = DateTime.now();
-    final dateString =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final targetDate = DateTime.now().add(Duration(days: dayOffset));
+    final dateString = _formatDate(targetDate);
 
     final uri = Uri.parse(_forecastCoordsUrl).replace(
       queryParameters: {
@@ -386,7 +496,15 @@ class AirNowAqiService implements AqiService {
     }
 
     final label = locationLabel ?? 'Latitude: $latitude, Longitude: $longitude';
-    return _parseForecastResponse(response.body, label);
+    return _parseForecastResponse(
+      response.body,
+      label,
+      targetDate: targetDate,
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   /// Geocodes a place name (e.g. city) to coordinates using OpenStreetMap Nominatim.
@@ -455,53 +573,45 @@ class AirNowAqiService implements AqiService {
         return const AqiFailure(message: 'No observation data available.');
       }
 
-      // Parse observation data with intelligent pollutant selection
-      // The API may return multiple monitoring stations within the search radius
+      // Use records so we can carry reporting area / state alongside each entry.
       String? primaryReportingArea;
-      List<AqiSuccess> pm25Results = [];
-      List<AqiSuccess> pm25PrimaryResults = [];
-      List<AqiSuccess> otherResults = [];
+      List<({int aqi, String category, String? reportingArea, String? stateCode})> pm25Results = [];
+      List<({int aqi, String category, String? reportingArea, String? stateCode})> pm25PrimaryResults = [];
+      List<({int aqi, String category, String? reportingArea, String? stateCode})> otherResults = [];
 
       for (int i = 0; i < jsonData.length; i++) {
         final entry = jsonData[i];
-        if (entry is! Map<String, dynamic>) {
-          continue;
-        }
+        if (entry is! Map<String, dynamic>) continue;
 
         final map = entry;
         final aqi = map['AQI'] as int?;
         final parameterName = map['ParameterName'] as String?;
         final reportingArea = map['ReportingArea'] as String?;
+        final stateCode = map['StateCode'] as String?;
 
         if (aqi != null && aqi >= 0) {
           final category = map['Category'] as Map<String, dynamic>?;
           final categoryName = category?['Name'] as String?;
 
           if (categoryName != null && categoryName.isNotEmpty) {
-            final success = AqiSuccess(
-              data: AqiData(
-                aqiValue: aqi,
-                category: categoryName,
-                locationLabel: locationLabel,
-              ),
-              lastUpdated: DateTime.now(),
+            final record = (
+              aqi: aqi,
+              category: categoryName,
+              reportingArea: reportingArea,
+              stateCode: stateCode,
             );
 
-            // Identify primary reporting area from first valid entry
-            // This helps prioritize data from the main monitoring station
             if (primaryReportingArea == null && reportingArea != null) {
               primaryReportingArea = reportingArea;
             }
 
-            // Categorize results by pollutant type and location priority
             if (parameterName == 'PM2.5') {
-              pm25Results.add(success);
-              // Track PM2.5 from primary area separately for highest priority
+              pm25Results.add(record);
               if (reportingArea == primaryReportingArea) {
-                pm25PrimaryResults.add(success);
+                pm25PrimaryResults.add(record);
               }
             } else {
-              otherResults.add(success);
+              otherResults.add(record);
             }
           }
         }
@@ -511,14 +621,26 @@ class AirNowAqiService implements AqiService {
       // 1. PM2.5 from primary reporting area (most relevant)
       // 2. PM2.5 from any nearby area
       // 3. Other pollutants as fallback
+      ({int aqi, String category, String? reportingArea, String? stateCode})? best;
       if (pm25PrimaryResults.isNotEmpty) {
-        return pm25PrimaryResults.first;
+        best = pm25PrimaryResults.first;
+      } else if (pm25Results.isNotEmpty) {
+        best = pm25Results.first;
+      } else if (otherResults.isNotEmpty) {
+        best = otherResults.first;
       }
-      if (pm25Results.isNotEmpty) {
-        return pm25Results.first;
-      }
-      if (otherResults.isNotEmpty) {
-        return otherResults.first;
+
+      if (best != null) {
+        return AqiSuccess(
+          data: AqiData(
+            aqiValue: best.aqi,
+            category: best.category,
+            locationLabel: locationLabel,
+            reportingArea: best.reportingArea,
+            stateCode: best.stateCode,
+          ),
+          lastUpdated: DateTime.now(),
+        );
       }
 
       return const AqiFailure(message: 'No valid observation data available.');
@@ -543,7 +665,11 @@ class AirNowAqiService implements AqiService {
   ///
   /// Returns [AqiSuccess] with the best available forecast data, or [AqiFailure]
   /// if no valid forecast data can be parsed.
-  AqiResult _parseForecastResponse(String responseBody, String locationLabel) {
+  AqiResult _parseForecastResponse(
+    String responseBody,
+    String locationLabel, {
+    required DateTime targetDate,
+  }) {
     try {
       final jsonData = jsonDecode(responseBody) as List<dynamic>;
 
@@ -551,9 +677,7 @@ class AirNowAqiService implements AqiService {
         return const AqiFailure(message: 'No forecast data available.');
       }
 
-      // Find today's forecast (DateForecast matching today's date)
-      final now = DateTime.now();
-      final todayString = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      final targetDateString = _formatDate(targetDate);
 
       // First try to find today's PM2.5 forecast
       for (final entry in jsonData) {
@@ -563,8 +687,10 @@ class AirNowAqiService implements AqiService {
         final dateForecast = map['DateForecast'] as String?;
         final parameterName = map['ParameterName'] as String?;
         final aqi = map['AQI'] as int?;
+        final reportingArea = map['ReportingArea'] as String?;
+        final stateCode = map['StateCode'] as String?;
 
-        if (dateForecast == todayString && parameterName == 'PM2.5' && aqi != null && aqi >= 0) {
+        if (dateForecast == targetDateString && parameterName == 'PM2.5' && aqi != null && aqi >= 0) {
           final category = map['Category'] as Map<String, dynamic>?;
           final categoryName = category?['Name'] as String?;
 
@@ -574,6 +700,8 @@ class AirNowAqiService implements AqiService {
                 aqiValue: aqi,
                 category: categoryName,
                 locationLabel: locationLabel,
+                reportingArea: reportingArea,
+                stateCode: stateCode,
               ),
               lastUpdated: DateTime.now(),
             );
@@ -581,15 +709,17 @@ class AirNowAqiService implements AqiService {
         }
       }
 
-      // If no today's PM2.5 forecast found, fall back to today's forecast for any pollutant
+      // If no PM2.5 forecast found, fall back to same-date forecast for any pollutant
       for (final entry in jsonData) {
         if (entry is! Map<String, dynamic>) continue;
 
         final map = entry;
         final dateForecast = map['DateForecast'] as String?;
         final aqi = map['AQI'] as int?;
+        final reportingArea = map['ReportingArea'] as String?;
+        final stateCode = map['StateCode'] as String?;
 
-        if (dateForecast == todayString && aqi != null && aqi >= 0) {
+        if (dateForecast == targetDateString && aqi != null && aqi >= 0) {
           final category = map['Category'] as Map<String, dynamic>?;
           final categoryName = category?['Name'] as String?;
 
@@ -599,6 +729,8 @@ class AirNowAqiService implements AqiService {
                 aqiValue: aqi,
                 category: categoryName,
                 locationLabel: locationLabel,
+                reportingArea: reportingArea,
+                stateCode: stateCode,
               ),
               lastUpdated: DateTime.now(),
             );
@@ -612,6 +744,8 @@ class AirNowAqiService implements AqiService {
 
         final map = entry;
         final aqi = map['AQI'] as int?;
+        final reportingArea = map['ReportingArea'] as String?;
+        final stateCode = map['StateCode'] as String?;
 
         if (aqi != null && aqi >= 0) {
           final category = map['Category'] as Map<String, dynamic>?;
@@ -623,6 +757,8 @@ class AirNowAqiService implements AqiService {
                 aqiValue: aqi,
                 category: categoryName,
                 locationLabel: locationLabel,
+                reportingArea: reportingArea,
+                stateCode: stateCode,
               ),
               lastUpdated: DateTime.now(),
             );
