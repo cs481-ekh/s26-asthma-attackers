@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 
 import '../app_theme.dart';
 import '../models/aqi_result.dart';
@@ -214,11 +216,35 @@ class _RecommendationPageState extends State<RecommendationPage> {
                 ],
               ),
               const SizedBox(height: 12),
-              Center(
-                child: AirNowForecastWidget(
-                  city: cityState.city,
-                  state: cityState.state,
-                ),
+              Column(
+                children: [
+                  Center(
+                    child: AirNowForecastWidget(
+                      city: cityState.city,
+                      state: cityState.state,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.center,
+                    child: InkWell(
+                      onTap: () async {
+                        final uri = Uri.parse('https://www.airnow.gov/aqi/aqi-basics/');
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      child: const Text(
+                        'More details',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -734,12 +760,36 @@ class _ExplanationCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Text(
-              _getExplanation(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary,
-                    height: 1.5,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _getExplanation(),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textSecondary,
+                        height: 1.5,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                InkWell(
+                  onTap: () async {
+                    final uri = Uri.parse(
+                      'https://www.boisestate.edu/research-resilience/resources-hazards/air-quality-and-smoke/',
+                    );
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    }
+                  },
+                  child: const Text(
+                    'More information',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
+                ),
+              ],
             ),
           ],
         ),

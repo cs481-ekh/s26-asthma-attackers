@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 
 import '../app_theme.dart';
 import '../models/recommendation_args.dart';
@@ -34,6 +36,14 @@ class _HomePageState extends State<HomePage> {
     _locationController.dispose();
     _locationFocus.dispose();
     super.dispose();
+  }
+
+  Future<void> _openAirNowDetails() async {
+    final uri = Uri.parse(
+      'https://www.airnow.gov/?city=Boise&state=ID&country=USA',
+    );
+
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _openSymptomModal() async {
@@ -281,13 +291,28 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          kIsWeb
-                              ? 'Enter a ZIP code or city name (required on web).'
-                              : 'Use your device location or enter a ZIP code or city.',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppTheme.textSecondary,
-                            height: 1.4,
+                        RichText(
+                          text: TextSpan(
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: AppTheme.textSecondary,
+                              height: 1.4,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: kIsWeb
+                                    ? 'Enter a ZIP code or city name (required on web). '
+                                    : 'Use your device location or enter a ZIP code or city. ',
+                              ),
+                              TextSpan(
+                                text: 'More details',
+                                style: TextStyle(
+                                  color: theme.colorScheme.primary,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = _openAirNowDetails,
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 14),
