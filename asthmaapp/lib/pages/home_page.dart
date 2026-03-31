@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../app_theme.dart';
 import '../models/recommendation_args.dart';
 import '../pages/recommendation_page.dart';
 import '../utils/location_validator.dart';
@@ -181,6 +182,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Asthma Activity Advisor'),
@@ -191,130 +194,179 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'An App for Asthma Warriors',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.grey.shade700,
+              Container(
+                padding: const EdgeInsets.fromLTRB(22, 28, 22, 28),
+                decoration: AppTheme.homeHeroDecoration(),
+                child: Column(
+                  children: [
+                    Text(
+                      'An app for asthma warriors',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                textAlign: TextAlign.center,
+                    const SizedBox(height: 10),
+                    Text(
+                      'Check air quality and get activity ideas that fit how your child feels today.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        height: 1.45,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 28),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Child\'s symptom level',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+              Semantics(
+                container: true,
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Semantics(
+                          header: true,
+                          child: Text(
+                            'Child\'s symptom level',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary,
                             ),
-                      ),
-                      const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        onPressed: _openSymptomModal,
-                        icon: const Icon(Icons.arrow_drop_down, size: 24),
-                        label: Text(
-                          _symptomLevel != null
-                              ? '${_symptomLevel!.id}: ${_symptomLevel!.label}'
-                              : 'Select symptom level',
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          alignment: Alignment.centerLeft,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 14),
+                        OutlinedButton.icon(
+                          onPressed: _openSymptomModal,
+                          icon: const Icon(Icons.arrow_drop_down, size: 24),
+                          label: Text(
+                            _symptomLevel != null
+                                ? '${_symptomLevel!.id}: ${_symptomLevel!.label}'
+                                : 'Select symptom level',
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Location for air quality',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+              const SizedBox(height: 18),
+              Semantics(
+                container: true,
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Semantics(
+                          header: true,
+                          child: Text(
+                            'Location for air quality',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary,
                             ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        kIsWeb
-                            ? 'Enter a ZIP code or city name (required on web).'
-                            : 'Use your device location or enter a ZIP code or city.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          kIsWeb
+                              ? 'Enter a ZIP code or city name (required on web).'
+                              : 'Use your device location or enter a ZIP code or city.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: AppTheme.textSecondary,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        if (!kIsWeb && _useDeviceLocation && _latitude != null && _longitude != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Row(
+                              children: [
+                                ExcludeSemantics(
+                                  child: Icon(
+                                    Icons.location_on,
+                                    color: theme.colorScheme.primary,
+                                    size: 22,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Using your location',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: _clearDeviceLocation,
+                                  child: const Text('Change'),
+                                ),
+                              ],
                             ),
-                      ),
-                      const SizedBox(height: 12),
-                      if (!kIsWeb && _useDeviceLocation && _latitude != null && _longitude != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            children: [
-                              Icon(Icons.location_on, color: Theme.of(context).colorScheme.primary, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Using your location',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                          )
+                        else ...[
+                          TextField(
+                            controller: _locationController,
+                            focusNode: _locationFocus,
+                            onChanged: (_) => _onLocationTextChanged(),
+                            decoration: InputDecoration(
+                              labelText: 'ZIP code or city',
+                              hintText: 'e.g. 83702 or Boise',
+                              prefixIcon: ExcludeSemantics(
+                                child: Icon(
+                                  Icons.location_on_outlined,
+                                  color: theme.colorScheme.primary,
                                 ),
                               ),
-                              TextButton(
-                                onPressed: _clearDeviceLocation,
-                                child: const Text('Change'),
-                              ),
-                            ],
+                              errorText: _locationValidationError,
+                            ),
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => _getRecommendation(),
                           ),
-                        )
-                      else ...[
-                        TextField(
-                          controller: _locationController,
-                          focusNode: _locationFocus,
-                          onChanged: (_) => _onLocationTextChanged(),
-                          decoration: InputDecoration(
-                            hintText: 'e.g. 83702 or Boise',
-                            prefixIcon: const Icon(Icons.location_on_outlined),
-                            errorText: _locationValidationError,
-                          ),
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: (_) => _getRecommendation(),
-                        ),
-                        if (!kIsWeb) ...[
+                          if (!kIsWeb) ...[
+                            const SizedBox(height: 14),
+                            OutlinedButton.icon(
+                              onPressed: _locationLoading ? null : _useMyLocation,
+                              icon: _locationLoading
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: Semantics(
+                                        label: 'Loading location',
+                                        child: const CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                    )
+                                  : const Icon(Icons.my_location, size: 22),
+                              label: Text(_locationLoading ? 'Getting location…' : 'Use my location'),
+                            ),
+                          ],
+                        ],
+                        if (_locationError != null) ...[
                           const SizedBox(height: 12),
-                          OutlinedButton.icon(
-                            onPressed: _locationLoading ? null : _useMyLocation,
-                            icon: _locationLoading
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  )
-                                : const Icon(Icons.my_location, size: 20),
-                            label: Text(_locationLoading ? 'Getting location…' : 'Use my location'),
+                          Text(
+                            _locationError!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.error,
+                            ),
                           ),
                         ],
                       ],
-                      if (_locationError != null) ...[
-                        const SizedBox(height: 10),
-                        Text(
-                          _locationError!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                        ),
-                      ],
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -322,7 +374,9 @@ class _HomePageState extends State<HomePage> {
               ElevatedButton(
                 onPressed: _symptomLevel == null || !_hasLocation ? null : _getRecommendation,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  backgroundColor: AppTheme.accentCoral,
+                  foregroundColor: Colors.white,
                 ),
                 child: const Text('Get activity recommendation'),
               ),

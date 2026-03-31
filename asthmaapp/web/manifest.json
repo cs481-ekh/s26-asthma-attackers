@@ -1,11 +1,11 @@
 {
-    "name": "asthmaapp",
-    "short_name": "asthmaapp",
+    "name": "Asthma Activity Advisor",
+    "short_name": "Activity Advisor",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0B6E6E",
+    "theme_color": "#0B6E6E",
+    "description": "Check air quality and get outdoor activity guidance for children with asthma.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

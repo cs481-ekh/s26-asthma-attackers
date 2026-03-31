@@ -126,16 +126,28 @@ class _AirNowForecastWidgetState extends State<AirNowForecastWidget> {
       );
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(25),
-      child: SizedBox(
-        width: 230,
-        height: 230,
-        child: Stack(
-          children: [
-            WebViewWidget(controller: _controller),
-            if (_loading) const Center(child: CircularProgressIndicator()),
-          ],
+    final label =
+        'AirNow interactive air quality dial and forecast for ${widget.city}'
+        '${widget.state != null && widget.state!.isNotEmpty ? ', ${widget.state}' : ''}.';
+    return Semantics(
+      label: label,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(25),
+        child: SizedBox(
+          width: 230,
+          height: 230,
+          child: Stack(
+            children: [
+              WebViewWidget(controller: _controller),
+              if (_loading)
+                Center(
+                  child: Semantics(
+                    label: 'Loading air quality widget',
+                    child: const CircularProgressIndicator(),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

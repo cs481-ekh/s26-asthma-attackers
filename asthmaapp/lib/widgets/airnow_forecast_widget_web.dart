@@ -34,6 +34,7 @@ class _AirNowForecastWidgetState extends State<AirNowForecastWidget> {
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId) {
       final iframe = web.HTMLIFrameElement()
         ..src = _buildWidgetUrl()
+        ..title = 'AirNow air quality dial and forecast for ${widget.city}'
         ..style.border = 'none'
         ..style.borderRadius = '25px'
         ..style.width = '230px'
@@ -57,12 +58,18 @@ class _AirNowForecastWidgetState extends State<AirNowForecastWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(25),
-      child: SizedBox(
-        width: 230,
-        height: 230,
-        child: HtmlElementView(viewType: _viewType),
+    final label =
+        'AirNow interactive air quality dial and forecast for ${widget.city}'
+        '${widget.state != null && widget.state!.isNotEmpty ? ', ${widget.state}' : ''}.';
+    return Semantics(
+      label: label,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(25),
+        child: SizedBox(
+          width: 230,
+          height: 230,
+          child: HtmlElementView(viewType: _viewType),
+        ),
       ),
     );
   }

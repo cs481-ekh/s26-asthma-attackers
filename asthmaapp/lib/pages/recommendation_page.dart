@@ -162,6 +162,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       builder: (_) => _NextDayGuidanceSheet(
         aqiService: _aqiService,
         args: args,
@@ -196,13 +197,19 @@ class _RecommendationPageState extends State<RecommendationPage> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.air, color: AppTheme.primaryTeal, size: 28),
+                  ExcludeSemantics(
+                    child: Icon(Icons.air, color: AppTheme.primaryTeal, size: 28),
+                  ),
                   const SizedBox(width: 10),
-                  Text(
-                    'Air quality',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      'Air quality',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
+                    ),
                   ),
                 ],
               ),
@@ -236,6 +243,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
         title: const Text('Activity recommendation'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
+          tooltip: 'Go back',
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -267,6 +275,10 @@ class _RecommendationPageState extends State<RecommendationPage> {
                 onPressed: _openNextDayGuidance,
                 icon: const Icon(Icons.calendar_today_outlined),
                 label: const Text('View next-day activity guidance'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                ),
               ),
             ],
           ),
@@ -352,11 +364,15 @@ class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Next-day activity guidance',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+              Semantics(
+                header: true,
+                child: Text(
+                  'Next-day activity guidance',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                      ),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -365,9 +381,14 @@ class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
               ),
               const SizedBox(height: 16),
               if (_loading)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: Center(child: CircularProgressIndicator()),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
+                    child: Semantics(
+                      label: 'Loading next-day forecast',
+                      child: const CircularProgressIndicator(),
+                    ),
+                  ),
                 )
               else if (_nextDayResult is AqiFailure)
                 _AqiCard(
@@ -453,29 +474,38 @@ class _AqiCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.air, color: AppTheme.primaryTeal, size: 28),
+                ExcludeSemantics(
+                  child: Icon(Icons.air, color: AppTheme.primaryTeal, size: 28),
+                ),
                 const SizedBox(width: 10),
-                Text(
-                  'Air quality',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                Semantics(
+                  header: true,
+                  child: Text(
+                    'Air quality',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                        ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             if (loading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   children: [
                     SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: Semantics(
+                        label: 'Loading air quality',
+                        child: const CircularProgressIndicator(strokeWidth: 2),
+                      ),
                     ),
-                    SizedBox(width: 12),
-                    Text('Loading air quality…'),
+                    const SizedBox(width: 12),
+                    const Text('Loading air quality…'),
                   ],
                 ),
               )
@@ -563,62 +593,84 @@ class _RecommendationCard extends StatelessWidget {
   final Recommendation? moderateRecommendation;
   final Recommendation? vigorousRecommendation;
 
-  Widget _activityRow(String label, Recommendation? result) {
+  /// Dark green / red for icon + text contrast on light backgrounds (not sole indicator).
+  static const Color _okGreen = Color(0xFF0D5C2E);
+  static const Color _notOkRed = Color(0xFFB71C1C);
+
+  Widget _activityRow(BuildContext context, String label, Recommendation? result) {
     if (result == null) {
-      return Text("$label: loading...");
+      return Text(
+        '$label: loading...',
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.textSecondary),
+      );
     }
 
     final isOk = result == Recommendation.ok;
+    final statusText = isOk ? 'Recommended' : 'Not recommended';
 
-    return Row(
-      children: [
-        Icon(
-          isOk ? Icons.check_circle : Icons.cancel,
-          color: isOk ? Colors.green : Colors.red,
-        ),
-        const SizedBox(width: 8),
-        Text("$label: ${isOk ? "Recommended" : "Not recommended"}"),
-      ],
+    return Semantics(
+      label: '$label: $statusText',
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            isOk ? Icons.check_circle : Icons.cancel,
+            color: isOk ? _okGreen : _notOkRed,
+            size: 22,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              '$label: $statusText',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    height: 1.35,
+                    color: AppTheme.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    const placeholderColor = Color(0xFF4CAF50);
     return Card(
-      color: placeholderColor.withValues(alpha: 0.12),
+      color: AppTheme.primaryTeal.withValues(alpha: 0.06),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Recommended activity',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+            Semantics(
+              header: true,
+              child: Text(
+                'Recommended activity',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
+              ),
             ),
-            const SizedBox(height: 8),
-            // Text(
-            //   symptomLevel != null
-            //       ? 'Maximum allowable activity will appear here based on AQI and symptom level (${symptomLevel!.id}).'
-            //       : 'Recommendation will appear here once AQI is available.',
-            //   style: Theme.of(context).textTheme.bodyLarge,
-            // ),
+            const SizedBox(height: 12),
             if (symptomLevel == null)
               Text(
                 'Recommendation will appear here once AQI is available.',
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      height: 1.45,
+                      color: AppTheme.textSecondary,
+                    ),
               )
             else
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _activityRow("Light activity", lightRecommendation),
-                  const SizedBox(height: 6),
-                  _activityRow("Medium activity", moderateRecommendation),
-                  const SizedBox(height: 6),
-                  _activityRow("Vigorous activity", vigorousRecommendation),
+                  _activityRow(context, 'Light activity', lightRecommendation),
+                  const SizedBox(height: 10),
+                  _activityRow(context, 'Medium activity', moderateRecommendation),
+                  const SizedBox(height: 10),
+                  _activityRow(context, 'Vigorous activity', vigorousRecommendation),
                 ],
               ),
           ],
@@ -667,21 +719,26 @@ class _ExplanationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Why this recommendation',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+            Semantics(
+              header: true,
+              child: Text(
+                'Why this recommendation',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               _getExplanation(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade800,
+                    color: AppTheme.textSecondary,
+                    height: 1.5,
                   ),
             ),
           ],
@@ -692,25 +749,40 @@ class _ExplanationCard extends StatelessWidget {
 }
 
 class _DisclaimerCard extends StatelessWidget {
+  static const Color _amberBorder = Color(0xFFC67F00);
+  static const Color _amberIcon = Color(0xFF8D5B00);
+  static const Color _amberBg = Color(0xFFFFF8E6);
+
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.amber.shade50,
+      color: _amberBg,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: _amberBorder, width: 1.5),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.info_outline, color: Colors.amber.shade800, size: 22),
-            const SizedBox(width: 10),
+            ExcludeSemantics(
+              child: Icon(Icons.health_and_safety_outlined, color: _amberIcon, size: 26),
+            ),
+            const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                'This app is a guidance tool only and is not a substitute for '
-                'professional medical advice. It does not diagnose asthma or any '
-                'medical condition and does not provide emergency medical guidance.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade800,
-                    ),
+              child: Semantics(
+                container: true,
+                child: Text(
+                  'This app is a guidance tool only and is not a substitute for '
+                  'professional medical advice. It does not diagnose asthma or any '
+                  'medical condition and does not provide emergency medical guidance.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textPrimary,
+                        height: 1.5,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
               ),
             ),
           ],
