@@ -688,6 +688,16 @@ class _RecommendationCard extends StatelessWidget {
                     ),
               )
             else
+              // Column(
+              //   crossAxisAlignment: CrossAxisAlignment.start,
+              //   children: [
+              //     _activityRow(context, 'Light activity', lightRecommendation),
+              //     const SizedBox(height: 10),
+              //     _activityRow(context, 'Medium activity', moderateRecommendation),
+              //     const SizedBox(height: 10),
+              //     _activityRow(context, 'Vigorous activity', vigorousRecommendation),
+              //   ],
+              // ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -696,6 +706,58 @@ class _RecommendationCard extends StatelessWidget {
                   _activityRow(context, 'Medium activity', moderateRecommendation),
                   const SizedBox(height: 10),
                   _activityRow(context, 'Vigorous activity', vigorousRecommendation),
+
+                  const SizedBox(height: 16),
+
+                  ExpansionTile(
+                    tilePadding: EdgeInsets.zero,
+                    childrenPadding: const EdgeInsets.only(left: 4, right: 4, bottom: 8),
+                    title: const Text(
+                      'Activity examples',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    children: const [
+                      _ActivityExampleSection(
+                        title: 'Light activity',
+                        examples: [
+                          'Walking slowly on level ground',
+                          'Sitting in chair, standing',
+                          'Using computer',
+                          'Writing on paper or black board',
+                          'Cooking, eating, drinking',
+                          'Playing musical instruments',
+                          'Carrying school books',
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      _ActivityExampleSection(
+                        title: 'Moderate activity',
+                        examples: [
+                          'Playing badminton',
+                          'Skateboarding',
+                          'Aerobic dancing',
+                          'Competitive table tennis',
+                          'Softball - slow pitch',
+                          'Shooting basketballs',
+                          'Outdoor carpentry',
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      _ActivityExampleSection(
+                        title: 'Vigorous activity',
+                        examples: [
+                          'Running, jogging',
+                          'Performing jumping jacks',
+                          'Football, Soccer, Baseball',
+                          'Competitive swimming',
+                          'Ice hockey, Water polo',
+                          'Racquetball, Squash',
+                        ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
           ],
@@ -836,6 +898,51 @@ class _DisclaimerCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ActivityExampleSection extends StatelessWidget {
+  final String title;
+  final List<String> examples;
+
+  const _ActivityExampleSection({
+    required this.title,
+    required this.examples,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 6),
+          ...examples.map(
+            (e) => Padding(
+              padding: const EdgeInsets.only(left: 8, bottom: 3),
+              child: Row(
+                children: [
+                  const Text('• '),
+                  Expanded(
+                    child: Text(
+                      e,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
