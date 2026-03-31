@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../app_theme.dart';
+
 /// Symptom level as defined by NIH (project plan 3.1.2).
 /// A = No respiratory or asthma symptoms
 /// B = Few respiratory or asthma symptoms
@@ -38,8 +40,9 @@ class SymptomModal extends StatelessWidget {
     return showModalBottomSheet<SymptomLevel>(
       context: context,
       isScrollControlled: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => _SymptomModalContent(
         initialSelection: current,
@@ -104,17 +107,22 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
-                'Select symptom level',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+              Semantics(
+                header: true,
+                child: Text(
+                  'Select symptom level',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                      ),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Choose the option that best describes the child\'s current respiratory or asthma symptoms.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade700,
+                      color: AppTheme.textSecondary,
+                      height: 1.45,
                     ),
               ),
               const SizedBox(height: 20),
@@ -133,13 +141,16 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppTheme.primaryTeal.withValues(alpha: 0.06)
+                                  : null,
                               border: Border.all(
                                 color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Colors.grey.shade300,
+                                    ? AppTheme.primaryTeal
+                                    : Colors.black.withValues(alpha: 0.12),
                                 width: isSelected ? 2 : 1,
                               ),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +163,8 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
                                           .textTheme
                                           .titleMedium
                                           ?.copyWith(
-                                            fontWeight: FontWeight.bold,
+                                            fontWeight: FontWeight.w800,
+                                            color: AppTheme.textPrimary,
                                           ),
                                     ),
                                     const SizedBox(width: 8),
@@ -184,7 +196,8 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
                                       .textTheme
                                       .bodySmall
                                       ?.copyWith(
-                                        color: Colors.grey.shade700,
+                                        color: AppTheme.textSecondary,
+                                        height: 1.4,
                                       ),
                                 ),
                               ],
@@ -201,6 +214,11 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
                 onPressed: _selected == null
                     ? null
                     : () => widget.onSelect(_selected!),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.accentCoral,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                ),
                 child: const Text('Confirm selection'),
               ),
             ],
