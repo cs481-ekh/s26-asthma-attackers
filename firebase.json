@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "public",
+    "public": "asthmaapp/build",
     "ignore": [
       "firebase.json",
       "**/.*",
