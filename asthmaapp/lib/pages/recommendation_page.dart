@@ -271,6 +271,23 @@ class _RecommendationPageState extends State<RecommendationPage> {
           tooltip: 'Go back',
           onPressed: () => Navigator.of(context).pop(),
         ),
+
+        actions : [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.menu),
+            onSelected: (value) {
+              if (value == 'about') {
+                Navigator.pushNamed(context, '/about');
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'about',
+                child: Text('About'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
