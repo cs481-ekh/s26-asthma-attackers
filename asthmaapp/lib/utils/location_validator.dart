@@ -1,10 +1,11 @@
 /// Validates location entry field input: accepts US ZIP code or city name.
 ///
 /// - **ZIP code**: 5 digits, or 5 digits + hyphen + 4 digits (ZIP+4).
-/// - **City name**: At least 2 characters; letters, spaces, hyphens, apostrophes only.
+/// - **City name**: 2-100 characters; letters, spaces, hyphens, apostrophes only.
 class LocationValidator {
   LocationValidator._();
 
+  static const int _maxCityNameLength = 100;
   static final RegExp _zipCode = RegExp(r'^\d{5}(-\d{4})?$');
   static final RegExp _cityName = RegExp(r"^[a-zA-Z][a-zA-Z\s\-']{1,}$");
 
@@ -17,7 +18,7 @@ class LocationValidator {
   /// Returns true if [input] looks like a city name (2+ chars, letters/spaces/hyphens/apostrophes).
   static bool isValidCityName(String input) {
     final trimmed = input.trim();
-    if (trimmed.length < 2) return false;
+    if (trimmed.length < 2 || trimmed.length > _maxCityNameLength) return false;
     return _cityName.hasMatch(trimmed);
   }
 
