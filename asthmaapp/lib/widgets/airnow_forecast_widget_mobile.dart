@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+/// Logical size of the embedded AirNow WebView (matches EPA dial iframe intent).
+const double kAirNowEmbedSize = 230;
+
 /// Mobile/desktop implementation of the AirNow AQI forecast widget.
 class AirNowForecastWidget extends StatefulWidget {
   const AirNowForecastWidget({
@@ -47,9 +50,7 @@ class _AirNowForecastWidgetState extends State<AirNowForecastWidget> {
               });
             }
           },
-          onPageFinished: (_) {
-            if (mounted) setState(() => _loading = false);
-          },
+          onPageFinished: (_) => _onEmbedPageFinished(),
           onWebResourceError: (error) {
             // Ignore sub-resource failures; only fail when the main document fails.
             if (error.isForMainFrame != true) return;
@@ -64,6 +65,22 @@ class _AirNowForecastWidgetState extends State<AirNowForecastWidget> {
         ),
       )
       ..loadRequest(Uri.parse(_buildWidgetUrl()));
+  }
+
+  /// Narrow viewport so the dial scales to our fixed WebView size (otherwise
+  /// the page can lay out for a wide screen and appear tiny in the corner).
+  Future<void> _onEmbedPageFinished() async {
+    if (mounted) setState(() => _loading = false);
+    final w = kAirNowEmbedSize.round();
+    try {
+      await _controller.runJavaScript('''
+(function(){
+  var m=document.querySelector("meta[name=viewport]");
+  if(!m){m=document.createElement("meta");m.setAttribute("name","viewport");document.head.appendChild(m);}
+  m.setAttribute("content","width=$w, initial-scale=1, maximum-scale=5");
+})();
+''');
+    } catch (_) {}
   }
 
   Future<void> _retryLoad() async {
@@ -92,8 +109,8 @@ class _AirNowForecastWidgetState extends State<AirNowForecastWidget> {
   Widget build(BuildContext context) {
     if (_hasError) {
       return SizedBox(
-        width: 230,
-        height: 230,
+        width: kAirNowEmbedSize,
+        height: kAirNowEmbedSize,
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
@@ -134,8 +151,8 @@ class _AirNowForecastWidgetState extends State<AirNowForecastWidget> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(25),
         child: SizedBox(
-          width: 230,
-          height: 230,
+          width: kAirNowEmbedSize,
+          height: kAirNowEmbedSize,
           child: Stack(
             children: [
               WebViewWidget(controller: _controller),

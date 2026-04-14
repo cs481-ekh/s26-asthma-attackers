@@ -88,7 +88,7 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Retry'));
+      await tester.tap(find.text('Retry'));
       await tester.pump();
       await tester.pumpAndSettle();
 
@@ -129,7 +129,7 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Retry'));
+      await tester.tap(find.text('Retry'));
       await tester.pump();
       await tester.pumpAndSettle();
 
@@ -168,6 +168,23 @@ void main() {
       expect(find.text('Medium activity: Not recommended'), findsOneWidget);
       expect(find.text('Vigorous activity: Not recommended'), findsOneWidget);
       expect(service.forecastLocationRequestCount, 1);
+    });
+  });
+
+  group('cityStateForAirNowEmbed', () {
+    test('merges API state when user types city without state', () {
+      final resolved = cityStateForAirNowEmbed(
+        location: 'Boise',
+        aqiResult: _successResult(
+          locationLabel: 'Boise, ID',
+          aqiValue: 42,
+          category: 'Good',
+          reportingArea: 'Boise',
+          stateCode: 'ID',
+        ),
+      );
+      expect(resolved?.city, 'Boise');
+      expect(resolved?.state, 'ID');
     });
   });
 }
@@ -211,12 +228,16 @@ AqiSuccess _successResult({
   required String locationLabel,
   required int aqiValue,
   required String category,
+  String? reportingArea,
+  String? stateCode,
 }) {
   return AqiSuccess(
     data: AqiData(
       aqiValue: aqiValue,
       category: category,
       locationLabel: locationLabel,
+      reportingArea: reportingArea,
+      stateCode: stateCode,
     ),
     lastUpdated: DateTime(2026, 4, 13, 10),
   );
