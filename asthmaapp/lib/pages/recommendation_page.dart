@@ -10,6 +10,71 @@ import '../widgets/airnow_forecast_widget.dart';
 import '../widgets/symptom_modal.dart';
 import '../services/slide_rule_service.dart';
 
+/// Resolves city + state for the embedded AirNow dial URL.
+///
+/// The EPA widget usually needs a US state. If the user typed only a city
+/// (e.g. "Boise"), [AqiData.stateCode] and [AqiData.reportingArea] from a
+/// successful API response are merged in so the embed matches the API data.
+({
+  String city,
+  String? state,
+})? cityStateForAirNowEmbed({
+  required String location,
+  required AqiResult? aqiResult,
+}) {
+  var cityState = parseCityStateForAirNow(location);
+
+  if (cityState == null && aqiResult is AqiSuccess) {
+    final data = aqiResult.data;
+    final area = data.reportingArea;
+    if (area != null && area.isNotEmpty) {
+      cityState = (city: area, state: data.stateCode);
+    }
+  }
+
+  if (cityState != null && aqiResult is AqiSuccess) {
+    final data = aqiResult.data;
+    final stateMissing =
+        cityState.state == null || cityState.state!.trim().isEmpty;
+    if (stateMissing &&
+        data.stateCode != null &&
+        data.stateCode!.trim().isNotEmpty) {
+      final apiCity = data.reportingArea?.trim();
+      final city = (apiCity != null && apiCity.isNotEmpty)
+          ? apiCity
+          : cityState.city;
+      cityState = (city: city, state: data.stateCode);
+    }
+  }
+
+  return cityState;
+}
+
+/// Tries to extract city and state from a location string for the AirNow embed.
+///
+/// Handles these formats:
+///  - "City, ST"  → city + 2-letter state abbreviation
+///  - "City"      → city only (state is null)
+///
+/// Returns null for ZIP codes (5 digits) and "Current location" strings
+/// since the AirNow widget requires a city name, not a ZIP or coordinates.
+({String city, String? state})? parseCityStateForAirNow(String location) {
+  final trimmed = location.trim();
+  if (trimmed.isEmpty || trimmed == 'Current location') return null;
+  // Reject plain ZIP codes (5-digit or ZIP+4)
+  if (RegExp(r'^\d{5}(-\d{4})?$').hasMatch(trimmed)) return null;
+  // Match "City, ST" with a 2-letter state abbreviation
+  final match = RegExp(r'^(.+?),\s*([A-Za-z]{2})$').firstMatch(trimmed);
+  if (match != null) {
+    return (
+      city: match.group(1)!.trim(),
+      state: match.group(2)!.toUpperCase(),
+    );
+  }
+  // Plain city name with no state
+  return (city: trimmed, state: null);
+}
+
 /// Displays activity recommendation based on symptom level and AQI.
 /// Fetches AQI using user-provided location (ZIP/city); displays most recent
 /// or handles failed API calls with retry and optional last-known AQI.
@@ -67,31 +132,6 @@ class _RecommendationPageState extends State<RecommendationPage> {
         symptomLevel: symptomLevel,
       ),
     );
-  }
-
-  /// Tries to extract city and state from a location string.
-  ///
-  /// Handles these formats:
-  ///  - "City, ST"  → city + 2-letter state abbreviation
-  ///  - "City"      → city only (state is null)
-  ///
-  /// Returns null for ZIP codes (5 digits) and "Current location" strings
-  /// since the AirNow widget requires a city name, not a ZIP or coordinates.
-  static ({String city, String? state})? _parseCityState(String location) {
-    final trimmed = location.trim();
-    if (trimmed.isEmpty || trimmed == 'Current location') return null;
-    // Reject plain ZIP codes (5-digit or ZIP+4)
-    if (RegExp(r'^\d{5}(-\d{4})?$').hasMatch(trimmed)) return null;
-    // Match "City, ST" with a 2-letter state abbreviation
-    final match = RegExp(r'^(.+?),\s*([A-Za-z]{2})$').firstMatch(trimmed);
-    if (match != null) {
-      return (
-        city: match.group(1)!.trim(),
-        state: match.group(2)!.toUpperCase(),
-      );
-    }
-    // Plain city name with no state
-    return (city: trimmed, state: null);
   }
 
   @override
@@ -176,18 +216,10 @@ class _RecommendationPageState extends State<RecommendationPage> {
   /// a parseable city name is available, or the plain [_AqiCard] fallback for
   /// ZIP codes and GPS-only locations.
   Widget _buildAqiDisplay() {
-    // 1. Try to parse city/state directly from the location string (typed city names).
-    var cityState = _parseCityState(_location);
-
-    // 2. If that returned null (GPS "Current location" or ZIP code), use the
-    //    ReportingArea/StateCode that the AirNow API already returned.
-    if (cityState == null && _aqiResult is AqiSuccess) {
-      final data = (_aqiResult as AqiSuccess).data;
-      final area = data.reportingArea;
-      if (area != null && area.isNotEmpty) {
-        cityState = (city: area, state: data.stateCode);
-      }
-    }
+    final cityState = cityStateForAirNowEmbed(
+      location: _location,
+      aqiResult: _aqiResult,
+    );
 
     if (cityState != null && _aqiResult is AqiSuccess) {
       return Card(
@@ -219,6 +251,9 @@ class _RecommendationPageState extends State<RecommendationPage> {
                 children: [
                   Center(
                     child: AirNowForecastWidget(
+                      key: ValueKey(
+                        'airnow-${cityState.city}-${cityState.state ?? ''}',
+                      ),
                       city: cityState.city,
                       state: cityState.state,
                     ),
