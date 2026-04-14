@@ -319,6 +319,11 @@ class _HomePageState extends State<HomePage> {
                                 text: kIsWeb
                                     ? 'Enter a ZIP code or city name (required on web). '
                                     : 'Use your device location or enter a ZIP code or city. ',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppTheme.textSecondary,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.45,
+                                ),
                               ),
                               TextSpan(
                                 text: 'More details',
@@ -417,7 +422,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: _symptomLevel == null || !_hasLocation ? null : _getRecommendation,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 18),
-                  backgroundColor: AppTheme.accentCoral,
+                  backgroundColor: AppTheme.bsuOrange,
                   foregroundColor: Colors.white,
                 ),
                 child: const Text('Get activity recommendation'),

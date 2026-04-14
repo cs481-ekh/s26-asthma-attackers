@@ -231,7 +231,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
               Row(
                 children: [
                   ExcludeSemantics(
-                    child: Icon(Icons.air, color: AppTheme.primaryTeal, size: 28),
+                    child: Icon(Icons.air, color: AppTheme.bsuBlue, size: 28),
                   ),
                   const SizedBox(width: 10),
                   Semantics(
@@ -271,7 +271,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
                       child: const Text(
                         'More details',
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: AppTheme.linkColor,
                           decoration: TextDecoration.underline,
                           fontWeight: FontWeight.w500,
                         ),
@@ -552,7 +552,7 @@ class _AqiCard extends StatelessWidget {
             Row(
               children: [
                 ExcludeSemantics(
-                  child: Icon(Icons.air, color: AppTheme.primaryTeal, size: 28),
+                  child: Icon(Icons.air, color: AppTheme.bsuBlue, size: 28),
                 ),
                 const SizedBox(width: 10),
                 Semantics(
@@ -734,7 +734,7 @@ class _RecommendationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: AppTheme.primaryTeal.withValues(alpha: 0.06),
+      color: AppTheme.bsuBlue.withValues(alpha: 0.06),
       child: Padding(
         padding: const EdgeInsets.all(22),
         child: Column(
@@ -916,7 +916,7 @@ class _ExplanationCard extends StatelessWidget {
                   child: const Text(
                     'More information',
                     style: TextStyle(
-                      color: Colors.blue,
+                      color: AppTheme.linkColor,
                       decoration: TextDecoration.underline,
                       fontWeight: FontWeight.w500,
                     ),

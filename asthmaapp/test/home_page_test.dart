@@ -120,7 +120,7 @@ Future<void> _selectSymptom(
   String label,
 ) async {
   await _prepareViewport(tester);
-  await tester.tap(find.widgetWithText(OutlinedButton, 'Select symptom level'));
+  await tester.tap(find.text('Select symptom level'));
   await tester.pumpAndSettle();
 
   final labelFinder = find.text(label);

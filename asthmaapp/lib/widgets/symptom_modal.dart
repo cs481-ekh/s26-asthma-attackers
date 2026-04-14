@@ -142,11 +142,11 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? AppTheme.primaryTeal.withValues(alpha: 0.06)
+                                    ? AppTheme.bsuBlue.withValues(alpha: 0.06)
                                   : null,
                               border: Border.all(
                                 color: isSelected
-                                    ? AppTheme.primaryTeal
+                                    ? AppTheme.bsuBlue
                                     : Colors.black.withValues(alpha: 0.12),
                                 width: isSelected ? 2 : 1,
                               ),
@@ -215,7 +215,7 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
                     ? null
                     : () => widget.onSelect(_selected!),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentCoral,
+                  backgroundColor: AppTheme.bsuOrange,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 48),
                 ),

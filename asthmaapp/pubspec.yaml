@@ -37,7 +37,6 @@ dependencies:
   http: ^1.1.0
   webview_flutter: ^4.10.0
   web: ^1.1.1
-  google_fonts: ^8.0.2
   url_launcher: ^6.3.0
 
 dev_dependencies:
@@ -66,6 +65,18 @@ flutter:
   assets:
     - .env
     - assets/images/
+
+  fonts:
+    - family: Gotham
+      fonts:
+        - asset: assets/fonts/Gotham-Regular.otf
+          weight: 400
+        - asset: assets/fonts/Gotham-Bold.otf
+          weight: 700
+    - family: Garamond
+      fonts:
+        - asset: assets/fonts/Garamond-Regular.ttf
+          weight: 400
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
