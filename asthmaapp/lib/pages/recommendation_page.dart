@@ -650,6 +650,16 @@ class _RecommendationCard extends StatelessWidget {
     final isOk = result == Recommendation.ok;
     final statusText = isOk ? 'Recommended' : 'Not recommended';
 
+    // Select image based on activity label
+    String? imageAsset;
+    if (label == 'Light activity') {
+      imageAsset = 'assets/images/mmiroshnichenko.jpg';
+    } else if (label == 'Medium activity') {
+      imageAsset = 'assets/images/pixabay.jpg';
+    } else if (label == 'Vigorous activity') {
+      imageAsset = 'assets/images/jim-de-ramos.jpg';
+    }
+
     return Semantics(
       label: '$label: $statusText',
       child: Row(
@@ -661,6 +671,16 @@ class _RecommendationCard extends StatelessWidget {
             size: 22,
           ),
           const SizedBox(width: 10),
+          if (imageAsset != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: Image.asset(
+                imageAsset,
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+              ),
+            ),
           Expanded(
             child: Text(
               '$label: $statusText',
