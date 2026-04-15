@@ -44,6 +44,22 @@ import 'aqi_service.dart';
 /// }
 /// ```
 class AirNowAqiService implements AqiService {
+  static const String _apiKeyFromDefine = String.fromEnvironment(
+    'AIRNOW_API_KEY',
+    defaultValue: '',
+  );
+
+  static String? _resolveApiKey() {
+    final fromDotEnv = dotenv.env['AIRNOW_API_KEY'];
+    if (fromDotEnv != null && fromDotEnv.isNotEmpty) {
+      return fromDotEnv;
+    }
+    if (_apiKeyFromDefine.isNotEmpty) {
+      return _apiKeyFromDefine;
+    }
+    return null;
+  }
+
   /// Creates an AirNow AQI service instance.
   ///
   /// [simulateFailure] - If true, always returns failure for testing error states
@@ -52,7 +68,7 @@ class AirNowAqiService implements AqiService {
   /// The service automatically loads the API key from the AIRNOW_API_KEY environment variable.
   AirNowAqiService({this.simulateFailure = false, http.Client? httpClient})
       : _httpClient = httpClient ?? http.Client(),
-        _apiKey = dotenv.env['AIRNOW_API_KEY'];
+        _apiKey = _resolveApiKey();
 
   /// Whether to simulate service failures for testing purposes.
   final bool simulateFailure;

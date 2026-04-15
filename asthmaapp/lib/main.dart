@@ -7,7 +7,7 @@ import 'pages/recommendation_page.dart';
 import 'pages/about_page.dart';
 
 void main() async {
-  await dotenv.load();
+  await dotenv.load(isOptional: true);
   runApp(const AsthmaActivityAdvisorApp());
 }
 
