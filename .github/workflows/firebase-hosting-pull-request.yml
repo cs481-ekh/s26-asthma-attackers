@@ -24,17 +24,23 @@ jobs:
       - run: flutter --version
       - run: flutter pub get
       - name: Validate AIRNOW_API_KEY secret
+        id: airnow_key
         run: |
           if [ -z "$AIRNOW_API_KEY" ]; then
-            echo "AIRNOW_API_KEY secret is not set"
-            exit 1
+            echo "AIRNOW_API_KEY secret is not set; skipping web build/preview."
+            echo "has_key=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_key=true" >> "$GITHUB_OUTPUT"
           fi
         env:
           AIRNOW_API_KEY: ${{ secrets.AIRNOW_API_KEY }}
-      - run: flutter build web --dart-define=AIRNOW_API_KEY=$AIRNOW_API_KEY
+      - name: Build web
+        if: steps.airnow_key.outputs.has_key == 'true'
+        run: flutter build web --dart-define=AIRNOW_API_KEY=$AIRNOW_API_KEY
         env:
           AIRNOW_API_KEY: ${{ secrets.AIRNOW_API_KEY }}
       - uses: FirebaseExtended/action-hosting-deploy@v0
+        if: steps.airnow_key.outputs.has_key == 'true'
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ASTHMA_ATTACKERS_4DED3 }}
