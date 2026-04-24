@@ -685,16 +685,6 @@ class _RecommendationCard extends StatelessWidget {
     final isOk = result == Recommendation.ok;
     final statusText = isOk ? 'Recommended' : 'Not recommended';
 
-    // Select image based on activity label
-    String? imageAsset;
-    if (label == 'Light activity') {
-      imageAsset = 'assets/images/mmiroshnichenko.jpg';
-    } else if (label == 'Medium activity') {
-      imageAsset = 'assets/images/pixabay.jpg';
-    } else if (label == 'Vigorous activity') {
-      imageAsset = 'assets/images/jim-de-ramos.jpg';
-    }
-
     return Semantics(
       label: '$label: $statusText',
       child: Row(
@@ -706,16 +696,6 @@ class _RecommendationCard extends StatelessWidget {
             size: 22,
           ),
           const SizedBox(width: 10),
-          if (imageAsset != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: Image.asset(
-                imageAsset,
-                width: 40,
-                height: 40,
-                fit: BoxFit.cover,
-              ),
-            ),
           Expanded(
             child: Text(
               '$label: $statusText',
@@ -760,16 +740,6 @@ class _RecommendationCard extends StatelessWidget {
                     ),
               )
             else
-              // Column(
-              //   crossAxisAlignment: CrossAxisAlignment.start,
-              //   children: [
-              //     _activityRow(context, 'Light activity', lightRecommendation),
-              //     const SizedBox(height: 10),
-              //     _activityRow(context, 'Medium activity', moderateRecommendation),
-              //     const SizedBox(height: 10),
-              //     _activityRow(context, 'Vigorous activity', vigorousRecommendation),
-              //   ],
-              // ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -984,37 +954,74 @@ class _ActivityExampleSection extends StatelessWidget {
     required this.examples,
   });
 
+  String? _getImageAsset() {
+    if (title == 'Light activity') {
+      return 'assets/images/mmiroshnichenko.jpg';
+    } else if (title == 'Moderate activity') {
+      return 'assets/images/pixabay.jpg';
+    } else if (title == 'Vigorous activity') {
+      return 'assets/images/jim-de-ramos.jpg';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final imageAsset = _getImageAsset();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          const SizedBox(height: 6),
-          ...examples.map(
-            (e) => Padding(
-              padding: const EdgeInsets.only(left: 8, bottom: 3),
-              child: Row(
-                children: [
-                  const Text('• '),
-                  Expanded(
-                    child: Text(
-                      e,
-                      style: Theme.of(context).textTheme.bodyMedium,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenWidth = MediaQuery.of(context).size.width;
+          // Use a fraction of the screen width for the image, with min/max bounds
+          final imageSize = screenWidth * 0.28;
+          final clampedSize = imageSize.clamp(72.0, 220.0);
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Examples list and title
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 6),
+                    ...examples.map(
+                      (e) => Padding(
+                        padding: const EdgeInsets.only(left: 8, bottom: 3),
+                        child: Row(
+                          children: [
+                            const Text('• '),
+                            Expanded(
+                              child: Text(
+                                e,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-        ],
+              if (imageAsset != null) ...[
+                const SizedBox(width: 8),
+                Image.asset(
+                  imageAsset,
+                  width: clampedSize,
+                  height: clampedSize,
+                  fit: BoxFit.cover,
+                ),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
