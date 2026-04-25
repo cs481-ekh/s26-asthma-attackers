@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/sdp_sticker.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -106,6 +107,16 @@ class AboutPage extends StatelessWidget {
                   decoration: TextDecoration.underline,
                 ),
               ),
+            ),
+
+            const SizedBox(height: 40),
+
+            const Divider(),
+
+            const SizedBox(height: 20),
+
+            Center(
+              child: SdpFooterSticker(),
             ),
           ],
         ),
