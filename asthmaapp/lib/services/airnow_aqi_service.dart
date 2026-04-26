@@ -49,15 +49,35 @@ class AirNowAqiService implements AqiService {
     defaultValue: '',
   );
 
-  static String? _resolveApiKey() {
-    final fromDotEnv = dotenv.env['AIRNOW_API_KEY'];
-    if (fromDotEnv != null && fromDotEnv.isNotEmpty) {
-      return fromDotEnv;
-    }
-    if (_apiKeyFromDefine.isNotEmpty) {
-      return _apiKeyFromDefine;
+  // Backward-compatible build-time key names used in some CI/local setups.
+  static const String _apiKeyFromLegacyDefine = String.fromEnvironment(
+    'API_KEY',
+    defaultValue: '',
+  );
+
+  static String? _normalizeSecret(String? value) {
+    if (value == null) return null;
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  static String? _firstPresent(Iterable<String?> candidates) {
+    for (final candidate in candidates) {
+      final normalized = _normalizeSecret(candidate);
+      if (normalized != null) {
+        return normalized;
+      }
     }
     return null;
+  }
+
+  static String? _resolveApiKey() {
+    return _firstPresent([
+      dotenv.env['AIRNOW_API_KEY'],
+      dotenv.env['API_KEY'],
+      _apiKeyFromDefine,
+      _apiKeyFromLegacyDefine,
+    ]);
   }
 
   /// Creates an AirNow AQI service instance.
