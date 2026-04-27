@@ -1,7 +1,10 @@
 import 'package:asthmaapp/pages/home_page.dart';
+import 'package:asthmaapp/services/locale_service.dart';
+import 'package:asthmaapp/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -100,7 +103,18 @@ void main() {
 }
 
 Widget _buildHomePage() {
-  return const MaterialApp(home: HomePage());
+  final localeNotifier = ValueNotifier<Locale?>(const Locale('en'));
+  return MaterialApp(
+    locale: localeNotifier.value,
+    supportedLocales: LocaleService.supportedLocales,
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    home: HomePage(localeNotifier: localeNotifier),
+  );
 }
 
 Future<void> _prepareViewport(WidgetTester tester) async {

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app_theme.dart';
+import '../l10n/app_localizations.dart';
 import '../models/aqi_result.dart';
 import '../models/recommendation_args.dart';
 import '../services/aqi_service.dart';
 import '../services/airnow_aqi_service.dart';
+import '../services/locale_service.dart';
 import '../widgets/airnow_forecast_widget.dart';
 import '../widgets/bottom_logos_bar.dart';
 import '../widgets/symptom_modal.dart';
@@ -16,10 +18,7 @@ import '../services/slide_rule_service.dart';
 /// The EPA widget usually needs a US state. If the user typed only a city
 /// (e.g. "Boise"), [AqiData.stateCode] and [AqiData.reportingArea] from a
 /// successful API response are merged in so the embed matches the API data.
-({
-  String city,
-  String? state,
-})? cityStateForAirNowEmbed({
+({String city, String? state})? cityStateForAirNowEmbed({
   required String location,
   required AqiResult? aqiResult,
 }) {
@@ -61,16 +60,18 @@ import '../services/slide_rule_service.dart';
 /// since the AirNow widget requires a city name, not a ZIP or coordinates.
 ({String city, String? state})? parseCityStateForAirNow(String location) {
   final trimmed = location.trim();
-  if (trimmed.isEmpty || trimmed == 'Current location') return null;
+  final lower = trimmed.toLowerCase();
+  if (trimmed.isEmpty ||
+      lower == 'current location' ||
+      lower == 'ubicación actual') {
+    return null;
+  }
   // Reject plain ZIP codes (5-digit or ZIP+4)
   if (RegExp(r'^\d{5}(-\d{4})?$').hasMatch(trimmed)) return null;
   // Match "City, ST" with a 2-letter state abbreviation
   final match = RegExp(r'^(.+?),\s*([A-Za-z]{2})$').firstMatch(trimmed);
   if (match != null) {
-    return (
-      city: match.group(1)!.trim(),
-      state: match.group(2)!.toUpperCase(),
-    );
+    return (city: match.group(1)!.trim(), state: match.group(2)!.toUpperCase());
   }
   // Plain city name with no state
   return (city: trimmed, state: null);
@@ -83,19 +84,20 @@ class RecommendationPage extends StatefulWidget {
   const RecommendationPage({
     super.key,
     this.aqiService,
+    required this.localeNotifier,
   });
 
   static const String routeName = '/recommendation';
 
   final AqiService? aqiService;
+  final ValueNotifier<Locale?> localeNotifier;
 
   @override
   State<RecommendationPage> createState() => _RecommendationPageState();
 }
 
 class _RecommendationPageState extends State<RecommendationPage> {
-  AqiService get _aqiService =>
-      widget.aqiService ?? AirNowAqiService();
+  AqiService get _aqiService => widget.aqiService ?? AirNowAqiService();
 
   RecommendationArgs? _args;
   AqiResult? _aqiResult;
@@ -107,14 +109,8 @@ class _RecommendationPageState extends State<RecommendationPage> {
 
   String get _location => _args?.location ?? '';
 
-  ({
-    Recommendation light,
-    Recommendation moderate,
-    Recommendation vigorous,
-  }) _recommendationsForCategory(
-    String category,
-    SymptomLevel symptomLevel,
-  ) {
+  ({Recommendation light, Recommendation moderate, Recommendation vigorous})
+  _recommendationsForCategory(String category, SymptomLevel symptomLevel) {
     final aqiColor = mapAqiCategory(category);
     return (
       light: SlideRuleService.getRecommendation(
@@ -146,9 +142,10 @@ class _RecommendationPageState extends State<RecommendationPage> {
       } else if (args.location.trim().isNotEmpty) {
         _fetchAqi();
       } else {
+        final l10n = AppLocalizations.of(context);
         setState(() {
-          _aqiResult = const AqiFailure(
-            message: 'Please use "Use my location" or enter a ZIP code or city on the home screen to see air quality.',
+          _aqiResult = AqiFailure(
+            message: l10n.recommendationMissingLocationMessage,
           );
         });
       }
@@ -163,7 +160,9 @@ class _RecommendationPageState extends State<RecommendationPage> {
       _aqiResult = null;
     });
     final AqiResult result;
-    if (args.useCoordinates && args.latitude != null && args.longitude != null) {
+    if (args.useCoordinates &&
+        args.latitude != null &&
+        args.longitude != null) {
       result = await _aqiService.getAqiForCoordinates(
         args.latitude!,
         args.longitude!,
@@ -172,9 +171,8 @@ class _RecommendationPageState extends State<RecommendationPage> {
     } else if (args.location.trim().isNotEmpty) {
       result = await _aqiService.getAqiForLocation(args.location);
     } else {
-      result = const AqiFailure(
-        message: 'No location provided. Use "Use my location" or enter a ZIP or city.',
-      );
+      final l10n = AppLocalizations.of(context);
+      result = AqiFailure(message: l10n.recommendationNoLocationProvided);
     }
     if (mounted) {
       setState(() {
@@ -191,7 +189,6 @@ class _RecommendationPageState extends State<RecommendationPage> {
           _moderateRecommendation = recommendations.moderate;
           _vigorousRecommendation = recommendations.vigorous;
         }
-
       });
     }
   }
@@ -238,11 +235,11 @@ class _RecommendationPageState extends State<RecommendationPage> {
                   Semantics(
                     header: true,
                     child: Text(
-                      'Air quality',
+                      AppLocalizations.of(context).airQualityTitle,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.textPrimary,
-                          ),
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                      ),
                     ),
                   ),
                 ],
@@ -264,14 +261,19 @@ class _RecommendationPageState extends State<RecommendationPage> {
                     alignment: Alignment.center,
                     child: InkWell(
                       onTap: () async {
-                        final uri = Uri.parse('https://www.airnow.gov/aqi/aqi-basics/');
+                        final uri = Uri.parse(
+                          'https://www.airnow.gov/aqi/aqi-basics/',
+                        );
                         if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
                         }
                       },
-                      child: const Text(
-                        'More details',
-                        style: TextStyle(
+                      child: Text(
+                        AppLocalizations.of(context).moreDetails,
+                        style: const TextStyle(
                           color: AppTheme.linkColor,
                           decoration: TextDecoration.underline,
                           fontWeight: FontWeight.w500,
@@ -298,29 +300,30 @@ class _RecommendationPageState extends State<RecommendationPage> {
   @override
   Widget build(BuildContext context) {
     final symptomLevel = _args?.symptomLevel;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Activity recommendation'),
+        title: Text(l10n.recommendationTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Go back',
+          tooltip: l10n.goBack,
           onPressed: () => Navigator.of(context).pop(),
         ),
 
-        actions : [
+        actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.menu),
             onSelected: (value) {
               if (value == 'about') {
                 Navigator.pushNamed(context, '/about');
+              } else if (value == 'language') {
+                _openLanguagePicker(context);
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'about',
-                child: Text('About'),
-              ),
+              PopupMenuItem(value: 'about', child: Text(l10n.menuAbout)),
+              PopupMenuItem(value: 'language', child: Text(l10n.menuLanguage)),
             ],
           ),
         ],
@@ -339,24 +342,29 @@ class _RecommendationPageState extends State<RecommendationPage> {
                 lightRecommendation: _lightRecommendation,
                 moderateRecommendation: _moderateRecommendation,
                 vigorousRecommendation: _vigorousRecommendation,
+                l10n: l10n,
               ),
               const SizedBox(height: 20),
               _ExplanationCard(
                 symptomLevel: symptomLevel,
                 aqiColor: _aqiResult is AqiSuccess
-                  ? mapAqiCategory((_aqiResult as AqiSuccess).data.category)
-                  : null,
+                    ? mapAqiCategory((_aqiResult as AqiSuccess).data.category)
+                    : null,
+                l10n: l10n,
               ),
               const SizedBox(height: 20),
-              _DisclaimerCard(),
+              _DisclaimerCard(l10n: l10n),
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 onPressed: _openNextDayGuidance,
                 icon: const Icon(Icons.calendar_today_outlined),
-                label: const Text('View next-day activity guidance'),
+                label: Text(l10n.nextDayGuidanceButton),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(48, 48),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
+                  ),
                 ),
               ),
             ],
@@ -364,6 +372,61 @@ class _RecommendationPageState extends State<RecommendationPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _openLanguagePicker(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final current = widget.localeNotifier.value?.languageCode ?? 'en';
+
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.languageTitle,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 12),
+                RadioListTile<String>(
+                  value: 'en',
+                  groupValue: current,
+                  title: Text(l10n.languageEnglish),
+                  onChanged: (v) => Navigator.of(context).pop(v),
+                ),
+                RadioListTile<String>(
+                  value: 'es',
+                  groupValue: current,
+                  title: Text(l10n.languageSpanish),
+                  onChanged: (v) => Navigator.of(context).pop(v),
+                ),
+                const SizedBox(height: 6),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(l10n.actionClose),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selected == null) return;
+    final locale = Locale(selected);
+    widget.localeNotifier.value = locale;
+    await LocaleService.save(locale);
   }
 }
 
@@ -380,8 +443,9 @@ class _NextDayGuidanceSheet extends StatefulWidget {
     Recommendation light,
     Recommendation moderate,
     Recommendation vigorous,
-  }) Function(String category, SymptomLevel symptomLevel)
-      recommendationsForCategory;
+  })
+  Function(String category, SymptomLevel symptomLevel)
+  recommendationsForCategory;
 
   @override
   State<_NextDayGuidanceSheet> createState() => _NextDayGuidanceSheetState();
@@ -405,7 +469,9 @@ class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
 
     final args = widget.args;
     final AqiResult result;
-    if (args.useCoordinates && args.latitude != null && args.longitude != null) {
+    if (args.useCoordinates &&
+        args.latitude != null &&
+        args.longitude != null) {
       result = await widget.aqiService.getForecastForCoordinates(
         args.latitude!,
         args.longitude!,
@@ -429,6 +495,7 @@ class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final symptomLevel = widget.args.symptomLevel;
     return SafeArea(
       child: Padding(
@@ -446,16 +513,16 @@ class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
               Semantics(
                 header: true,
                 child: Text(
-                  'Next-day activity guidance',
+                  l10n.nextDayGuidanceTitle,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary,
-                      ),
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Forecast-based recommendation for tomorrow.',
+                l10n.nextDayGuidanceSubtitle,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
@@ -464,7 +531,7 @@ class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Center(
                     child: Semantics(
-                      label: 'Loading next-day forecast',
+                      label: l10n.loadingNextDayForecast,
                       child: const CircularProgressIndicator(),
                     ),
                   ),
@@ -484,14 +551,13 @@ class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Forecast AQI: ${data.aqiValue} (${data.category})',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          l10n.forecastAqiLabel(data.aqiValue, data.category),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Location: ${data.locationLabel}',
+                          l10n.locationLabelValue(data.locationLabel),
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],
@@ -510,6 +576,7 @@ class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
                       lightRecommendation: recommendations.light,
                       moderateRecommendation: recommendations.moderate,
                       vigorousRecommendation: recommendations.vigorous,
+                      l10n: l10n,
                     );
                   },
                 ),
@@ -519,7 +586,7 @@ class _NextDayGuidanceSheetState extends State<_NextDayGuidanceSheet> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'),
+                  child: Text(l10n.actionClose),
                 ),
               ),
             ],
@@ -545,6 +612,7 @@ class _AqiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -560,11 +628,11 @@ class _AqiCard extends StatelessWidget {
                 Semantics(
                   header: true,
                   child: Text(
-                    'Air quality',
+                    l10n.airQualityTitle,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
-                        ),
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
               ],
@@ -579,69 +647,77 @@ class _AqiCard extends StatelessWidget {
                       width: 20,
                       height: 20,
                       child: Semantics(
-                        label: 'Loading air quality',
+                        label: l10n.loadingAirQuality,
                         child: const CircularProgressIndicator(strokeWidth: 2),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text('Loading air quality…'),
+                    Text(l10n.loadingAirQualityEllipsis),
                   ],
                 ),
               )
             else if (aqiResult == null)
               Text(
                 location.isEmpty
-                    ? 'Enter location on home to see AQI'
-                    : 'Location: $location',
+                    ? l10n.enterLocationForAqi
+                    : l10n.locationLabelValue(location),
                 style: Theme.of(context).textTheme.bodyMedium,
               )
             else
               ...switch (aqiResult!) {
-                AqiSuccess(data: final data, lastUpdated: final lastUpdated) => [
-                  Text(
-                    'Location: ${data.locationLabel}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'AQI: ${data.aqiValue}  •  ${data.category}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  if (lastUpdated != null) ...[
-                    const SizedBox(height: 4),
+                AqiSuccess(data: final data, lastUpdated: final lastUpdated) =>
+                  [
                     Text(
-                      'Updated ${_formatTime(lastUpdated)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey.shade600,
-                          ),
+                      l10n.locationLabelValue(data.locationLabel),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.aqiLabelValue(data.aqiValue, data.category),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (lastUpdated != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.updatedRelative(_formatTime(context, lastUpdated)),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ],
+                AqiFailure(
+                  message: final message,
+                  lastKnown: final lastKnown,
+                ) =>
+                  [
+                    Text(
+                      message,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                    if (lastKnown != null) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        l10n.lastKnownAqi(
+                          lastKnown.aqiValue,
+                          lastKnown.category,
+                        ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: onRetry,
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: Text(l10n.actionRetry),
                     ),
                   ],
-                ],
-                AqiFailure(message: final message, lastKnown: final lastKnown) => [
-                  Text(
-                    message,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                  ),
-                  if (lastKnown != null) ...[
-                    const SizedBox(height: 10),
-                    Text(
-                      'Last known: AQI ${lastKnown.aqiValue} (${lastKnown.category})',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey.shade700,
-                          ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: onRetry,
-                    icon: const Icon(Icons.refresh, size: 18),
-                    label: const Text('Retry'),
-                  ),
-                ],
               },
           ],
         ),
@@ -649,13 +725,14 @@ class _AqiCard extends StatelessWidget {
     );
   }
 
-  static String _formatTime(DateTime dt) {
+  static String _formatTime(BuildContext context, DateTime dt) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final diff = now.difference(dt);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
-    if (diff.inHours < 24) return '${diff.inHours} hr ago';
-    return '${diff.inDays} day(s) ago';
+    if (diff.inMinutes < 1) return l10n.relativeJustNow;
+    if (diff.inMinutes < 60) return l10n.relativeMinutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.relativeHoursAgo(diff.inHours);
+    return l10n.relativeDaysAgo(diff.inDays);
   }
 }
 
@@ -665,27 +742,37 @@ class _RecommendationCard extends StatelessWidget {
     this.lightRecommendation,
     this.moderateRecommendation,
     this.vigorousRecommendation,
+    required this.l10n,
   });
 
   final SymptomLevel? symptomLevel;
   final Recommendation? lightRecommendation;
   final Recommendation? moderateRecommendation;
   final Recommendation? vigorousRecommendation;
+  final AppLocalizations l10n;
 
   /// Dark green / red for icon + text contrast on light backgrounds (not sole indicator).
   static const Color _okGreen = Color(0xFF0D5C2E);
   static const Color _notOkRed = Color(0xFFB71C1C);
 
-  Widget _activityRow(BuildContext context, String label, Recommendation? result) {
+  Widget _activityRow(
+    BuildContext context,
+    String label,
+    Recommendation? result,
+  ) {
     if (result == null) {
       return Text(
-        '$label: loading...',
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.textSecondary),
+        l10n.activityLoading(label),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyLarge?.copyWith(color: AppTheme.textSecondary),
       );
     }
 
     final isOk = result == Recommendation.ok;
-    final statusText = isOk ? 'Recommended' : 'Not recommended';
+    final statusText = isOk
+        ? l10n.activityRecommended
+        : l10n.activityNotRecommended;
 
     return Semantics(
       label: '$label: $statusText',
@@ -702,10 +789,10 @@ class _RecommendationCard extends StatelessWidget {
             child: Text(
               '$label: $statusText',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    height: 1.35,
-                    color: AppTheme.textPrimary,
-                    fontWeight: FontWeight.w500,
-                  ),
+                height: 1.35,
+                color: AppTheme.textPrimary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -725,79 +812,96 @@ class _RecommendationCard extends StatelessWidget {
             Semantics(
               header: true,
               child: Text(
-                'Recommended activity',
+                l10n.recommendedActivityTitle,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
-                    ),
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
               ),
             ),
             const SizedBox(height: 12),
             if (symptomLevel == null)
               Text(
-                'Recommendation will appear here once AQI is available.',
+                l10n.recommendationPendingMessage,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      height: 1.45,
-                      color: AppTheme.textSecondary,
-                    ),
+                  height: 1.45,
+                  color: AppTheme.textSecondary,
+                ),
               )
             else
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _activityRow(context, 'Light activity', lightRecommendation),
+                  _activityRow(
+                    context,
+                    l10n.lightActivity,
+                    lightRecommendation,
+                  ),
                   const SizedBox(height: 10),
-                  _activityRow(context, 'Medium activity', moderateRecommendation),
+                  _activityRow(
+                    context,
+                    l10n.mediumActivity,
+                    moderateRecommendation,
+                  ),
                   const SizedBox(height: 10),
-                  _activityRow(context, 'Vigorous activity', vigorousRecommendation),
+                  _activityRow(
+                    context,
+                    l10n.vigorousActivity,
+                    vigorousRecommendation,
+                  ),
 
                   const SizedBox(height: 16),
 
                   ExpansionTile(
                     tilePadding: EdgeInsets.zero,
-                    childrenPadding: const EdgeInsets.only(left: 4, right: 4, bottom: 8),
-                    title: const Text(
-                      'Activity examples',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    childrenPadding: const EdgeInsets.only(
+                      left: 4,
+                      right: 4,
+                      bottom: 8,
                     ),
-                    children: const [
+                    title: Text(
+                      l10n.activityExamplesTitle,
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    children: [
                       _ActivityExampleSection(
-                        title: 'Light activity',
+                        title: l10n.lightActivity,
+                        imageAsset: 'assets/images/mmiroshnichenko.jpg',
                         examples: [
-                          'Walking slowly on level ground',
-                          'Sitting in chair, standing',
-                          'Using computer',
-                          'Writing on paper or black board',
-                          'Cooking, eating, drinking',
-                          'Playing musical instruments',
-                          'Carrying school books',
+                          l10n.exampleLight1,
+                          l10n.exampleLight2,
+                          l10n.exampleLight3,
+                          l10n.exampleLight4,
+                          l10n.exampleLight5,
+                          l10n.exampleLight6,
+                          l10n.exampleLight7,
                         ],
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       _ActivityExampleSection(
-                        title: 'Moderate activity',
+                        title: l10n.mediumActivity,
+                        imageAsset: 'assets/images/pixabay.jpg',
                         examples: [
-                          'Playing badminton',
-                          'Skateboarding',
-                          'Aerobic dancing',
-                          'Competitive table tennis',
-                          'Softball - slow pitch',
-                          'Shooting basketballs',
-                          'Outdoor carpentry',
+                          l10n.exampleModerate1,
+                          l10n.exampleModerate2,
+                          l10n.exampleModerate3,
+                          l10n.exampleModerate4,
+                          l10n.exampleModerate5,
+                          l10n.exampleModerate6,
+                          l10n.exampleModerate7,
                         ],
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       _ActivityExampleSection(
-                        title: 'Vigorous activity',
+                        title: l10n.vigorousActivity,
+                        imageAsset: 'assets/images/jim-de-ramos.jpg',
                         examples: [
-                          'Running, jogging',
-                          'Performing jumping jacks',
-                          'Football, Soccer, Baseball',
-                          'Competitive swimming',
-                          'Ice hockey, Water polo',
-                          'Racquetball, Squash',
+                          l10n.exampleVigorous1,
+                          l10n.exampleVigorous2,
+                          l10n.exampleVigorous3,
+                          l10n.exampleVigorous4,
+                          l10n.exampleVigorous5,
+                          l10n.exampleVigorous6,
                         ],
                       ),
                     ],
@@ -815,34 +919,36 @@ class _ExplanationCard extends StatelessWidget {
   const _ExplanationCard({
     this.symptomLevel,
     this.aqiColor,
+    required this.l10n,
   });
 
   final SymptomLevel? symptomLevel;
   final AqiColor? aqiColor;
+  final AppLocalizations l10n;
 
   String _getExplanation() {
     if (symptomLevel == null || aqiColor == null) {
-      return 'Explanation will appear here after you get a recommendation.';
+      return l10n.explanationPending;
     }
 
     switch (aqiColor) {
       case AqiColor.green:
-        return 'Air quality is good. Most people, even with symptoms, can safely perform outdoor activities';
+        return l10n.explanationGreen;
 
       case AqiColor.yellow:
-        return 'Air quality is acceptable. Sensitive individuals may experience mild symptoms, so consider limited prolonged exertion.';
+        return l10n.explanationYellow;
 
       case AqiColor.orange:
-        return 'Air quality is unhealthy for sensitive groups. Symptoms may worsen, so reduce outdoor activity intensity and duration.';
-      
+        return l10n.explanationOrange;
+
       case AqiColor.red:
-        return 'Air quality is unhealthy. It is recommended to avoid strenuous outdoor activities, especially if experiencing symptoms.';
+        return l10n.explanationRed;
 
       case AqiColor.purple:
-        return 'Air quality is very unhealthy. Outdoor activities should be avoided due to high risk of symptom aggravation.';
-    
+        return l10n.explanationPurple;
+
       default:
-        return 'Unable to determine recommendation';
+        return l10n.explanationUnknown;
     }
   }
 
@@ -857,11 +963,11 @@ class _ExplanationCard extends StatelessWidget {
             Semantics(
               header: true,
               child: Text(
-                'Why this recommendation',
+                l10n.whyRecommendationTitle,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
-                    ),
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -871,9 +977,9 @@ class _ExplanationCard extends StatelessWidget {
                 Text(
                   _getExplanation(),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.textSecondary,
-                        height: 1.5,
-                      ),
+                    color: AppTheme.textSecondary,
+                    height: 1.5,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 InkWell(
@@ -882,12 +988,15 @@ class _ExplanationCard extends StatelessWidget {
                       'https://www.boisestate.edu/research-resilience/resources-hazards/air-quality-and-smoke/',
                     );
                     if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
                     }
                   },
-                  child: const Text(
-                    'More information',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.moreInformation,
+                    style: const TextStyle(
                       color: AppTheme.linkColor,
                       decoration: TextDecoration.underline,
                       fontWeight: FontWeight.w500,
@@ -904,9 +1013,12 @@ class _ExplanationCard extends StatelessWidget {
 }
 
 class _DisclaimerCard extends StatelessWidget {
+  const _DisclaimerCard({required this.l10n});
+
   static const Color _amberBorder = Color(0xFFC67F00);
   static const Color _amberIcon = Color(0xFF8D5B00);
   static const Color _amberBg = Color(0xFFFFF8E6);
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -922,21 +1034,23 @@ class _DisclaimerCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ExcludeSemantics(
-              child: Icon(Icons.health_and_safety_outlined, color: _amberIcon, size: 26),
+              child: Icon(
+                Icons.health_and_safety_outlined,
+                color: _amberIcon,
+                size: 26,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Semantics(
                 container: true,
                 child: Text(
-                  'This app is a guidance tool only and is not a substitute for '
-                  'professional medical advice. It does not diagnose asthma or any '
-                  'medical condition and does not provide emergency medical guidance.',
+                  l10n.disclaimerText,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textPrimary,
-                        height: 1.5,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    color: AppTheme.textPrimary,
+                    height: 1.5,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
@@ -950,26 +1064,16 @@ class _DisclaimerCard extends StatelessWidget {
 class _ActivityExampleSection extends StatelessWidget {
   final String title;
   final List<String> examples;
+  final String? imageAsset;
 
   const _ActivityExampleSection({
     required this.title,
     required this.examples,
+    this.imageAsset,
   });
-
-  String? _getImageAsset() {
-    if (title == 'Light activity') {
-      return 'assets/images/mmiroshnichenko.jpg';
-    } else if (title == 'Moderate activity') {
-      return 'assets/images/pixabay.jpg';
-    } else if (title == 'Vigorous activity') {
-      return 'assets/images/jim-de-ramos.jpg';
-    }
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {
-    final imageAsset = _getImageAsset();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: LayoutBuilder(
@@ -989,8 +1093,8 @@ class _ActivityExampleSection extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     ...examples.map(
@@ -1015,7 +1119,7 @@ class _ActivityExampleSection extends StatelessWidget {
               if (imageAsset != null) ...[
                 const SizedBox(width: 8),
                 Image.asset(
-                  imageAsset,
+                  imageAsset!,
                   width: clampedSize,
                   height: clampedSize,
                   fit: BoxFit.cover,

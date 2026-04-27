@@ -2,9 +2,12 @@ import 'package:asthmaapp/models/aqi_result.dart';
 import 'package:asthmaapp/models/recommendation_args.dart';
 import 'package:asthmaapp/pages/recommendation_page.dart';
 import 'package:asthmaapp/services/aqi_service.dart';
+import 'package:asthmaapp/services/locale_service.dart';
+import 'package:asthmaapp/l10n/app_localizations.dart';
 import 'package:asthmaapp/widgets/symptom_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   group('RecommendationPage', () {
@@ -194,8 +197,17 @@ Future<void> _pumpRecommendationPage(
   required AqiService aqiService,
   required RecommendationArgs args,
 }) async {
+  final localeNotifier = ValueNotifier<Locale?>(const Locale('en'));
   await tester.pumpWidget(
     MaterialApp(
+      locale: localeNotifier.value,
+      supportedLocales: LocaleService.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: Builder(
         builder: (context) => Scaffold(
           body: ElevatedButton(
@@ -211,7 +223,10 @@ Future<void> _pumpRecommendationPage(
         if (settings.name == RecommendationPage.routeName) {
           return MaterialPageRoute<void>(
             settings: settings,
-            builder: (_) => RecommendationPage(aqiService: aqiService),
+            builder: (_) => RecommendationPage(
+              aqiService: aqiService,
+              localeNotifier: localeNotifier,
+            ),
           );
         }
         return null;

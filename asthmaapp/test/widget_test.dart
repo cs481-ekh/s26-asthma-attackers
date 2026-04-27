@@ -2,18 +2,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:asthmaapp/main.dart';
 import 'package:asthmaapp/models/aqi_result.dart';
 import 'package:asthmaapp/models/recommendation_args.dart';
 import 'package:asthmaapp/pages/recommendation_page.dart';
 import 'package:asthmaapp/services/aqi_service.dart';
+import 'package:asthmaapp/services/locale_service.dart';
+import 'package:asthmaapp/l10n/app_localizations.dart';
 import 'package:asthmaapp/widgets/symptom_modal.dart';
 
 void main() {
   testWidgets('App launches to home page with symptom and location inputs',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const AsthmaActivityAdvisorApp());
+    await tester.pumpWidget(AsthmaActivityAdvisorApp());
 
     expect(find.text('Asthma Activity Advisor'), findsOneWidget);
     expect(find.text('Get activity recommendation'), findsOneWidget);
@@ -22,9 +25,18 @@ void main() {
   testWidgets('AQI displays correctly after manual location entry',
       (WidgetTester tester) async {
     final stubService = _StubAqiService();
+    final localeNotifier = ValueNotifier<Locale?>(const Locale('en'));
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: localeNotifier.value,
+        supportedLocales: LocaleService.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home: Builder(
           builder: (context) => Scaffold(
             body: ElevatedButton(
@@ -43,7 +55,10 @@ void main() {
           if (settings.name == RecommendationPage.routeName) {
             return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => RecommendationPage(aqiService: stubService),
+              builder: (_) => RecommendationPage(
+                aqiService: stubService,
+                localeNotifier: localeNotifier,
+              ),
             );
           }
           return null;
@@ -63,9 +78,18 @@ void main() {
   testWidgets('Geolocation: AQI and location displayed correctly for device location',
       (WidgetTester tester) async {
     final stubService = _StubAqiService();
+    final localeNotifier = ValueNotifier<Locale?>(const Locale('en'));
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: localeNotifier.value,
+        supportedLocales: LocaleService.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home: Builder(
           builder: (context) => Scaffold(
             body: ElevatedButton(
@@ -86,7 +110,10 @@ void main() {
           if (settings.name == RecommendationPage.routeName) {
             return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => RecommendationPage(aqiService: stubService),
+              builder: (_) => RecommendationPage(
+                aqiService: stubService,
+                localeNotifier: localeNotifier,
+              ),
             );
           }
           return null;
@@ -106,9 +133,18 @@ void main() {
   testWidgets('Geolocation: error shown and Retry available when API fails for location',
       (WidgetTester tester) async {
     final failingService = _FailingAqiService();
+    final localeNotifier = ValueNotifier<Locale?>(const Locale('en'));
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: localeNotifier.value,
+        supportedLocales: LocaleService.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home: Builder(
           builder: (context) => Scaffold(
             body: ElevatedButton(
@@ -129,7 +165,10 @@ void main() {
           if (settings.name == RecommendationPage.routeName) {
             return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => RecommendationPage(aqiService: failingService),
+              builder: (_) => RecommendationPage(
+                aqiService: failingService,
+                localeNotifier: localeNotifier,
+              ),
             );
           }
           return null;
@@ -148,9 +187,18 @@ void main() {
   testWidgets('Unknown city or ZIP shows clear error and retry',
       (WidgetTester tester) async {
     final failingService = _FailingAqiService();
+    final localeNotifier = ValueNotifier<Locale?>(const Locale('en'));
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: localeNotifier.value,
+        supportedLocales: LocaleService.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home: Builder(
           builder: (context) => Scaffold(
             body: ElevatedButton(
@@ -169,7 +217,10 @@ void main() {
           if (settings.name == RecommendationPage.routeName) {
             return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => RecommendationPage(aqiService: failingService),
+              builder: (_) => RecommendationPage(
+                aqiService: failingService,
+                localeNotifier: localeNotifier,
+              ),
             );
           }
           return null;
@@ -188,9 +239,18 @@ void main() {
   testWidgets('Next-day guidance shows forecast-based recommendations',
       (WidgetTester tester) async {
     final stubService = _StubAqiService();
+    final localeNotifier = ValueNotifier<Locale?>(const Locale('en'));
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: localeNotifier.value,
+        supportedLocales: LocaleService.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home: Builder(
           builder: (context) => Scaffold(
             body: ElevatedButton(
@@ -209,7 +269,10 @@ void main() {
           if (settings.name == RecommendationPage.routeName) {
             return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => RecommendationPage(aqiService: stubService),
+              builder: (_) => RecommendationPage(
+                aqiService: stubService,
+                localeNotifier: localeNotifier,
+              ),
             );
           }
           return null;

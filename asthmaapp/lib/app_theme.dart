@@ -26,7 +26,14 @@ class AppTheme {
   /// Typography fallbacks per brand standards: Montserrat/Arial and Georgia.
   static const String sansFamily = 'Gotham';
   static const String serifFamily = 'Garamond';
-  static const List<String> sansFallback = <String>['Arial', 'sans-serif'];
+  // Gotham/Garamond don’t always include full Spanish glyph coverage.
+  // Add robust system fallbacks so accents/ñ render correctly.
+  static const List<String> sansFallback = <String>[
+    'Roboto',
+    'Noto Sans',
+    'Arial',
+    'sans-serif',
+  ];
   static const List<String> serifFallback = <String>[
     'Georgia',
     'Times New Roman',
@@ -59,6 +66,39 @@ class AppTheme {
   }
 
   static ThemeData get lightTheme {
+    return _buildLightTheme();
+  }
+
+  static ThemeData lightThemeForLocale(Locale? locale) {
+    if (locale?.languageCode != 'es') return _buildLightTheme();
+
+    // Our bundled Gotham font renders some Spanish glyphs incorrectly on
+    // certain platforms. For Spanish, prefer a system font stack with reliable
+    // Latin coverage.
+    const String safeSans = 'Arial';
+    const List<String> safeFallback = <String>[
+      'Roboto',
+      'Noto Sans',
+      'Arial',
+      'sans-serif',
+    ];
+
+    return _buildLightTheme(
+      sansFamilyOverride: safeSans,
+      sansFallbackOverride: safeFallback,
+      serifFamilyOverride: safeSans,
+    );
+  }
+
+  static ThemeData _buildLightTheme({
+    String? sansFamilyOverride,
+    List<String>? sansFallbackOverride,
+    String? serifFamilyOverride,
+  }) {
+    final effectiveSansFamily = sansFamilyOverride ?? sansFamily;
+    final effectiveSansFallback = sansFallbackOverride ?? sansFallback;
+    final effectiveSerifFamily = serifFamilyOverride ?? serifFamily;
+
     final baseScheme = ColorScheme.fromSeed(
       seedColor: bsuBlue,
       brightness: Brightness.light,
@@ -71,32 +111,36 @@ class AppTheme {
     );
 
     final baseTextTheme = Typography.material2021().black;
-    final sansTheme = _forceNoItalics(baseTextTheme.apply(
-      fontFamily: sansFamily,
-      bodyColor: textPrimary,
-      displayColor: textPrimary,
-    ));
+    final sansTheme = _forceNoItalics(
+      baseTextTheme.apply(
+        fontFamily: effectiveSansFamily,
+        bodyColor: textPrimary,
+        displayColor: textPrimary,
+      ),
+    );
 
     // Use Garamond for body copy to soften the UI (keeps headings in Gotham).
-    final serifBodyTheme = _forceNoItalics(baseTextTheme.apply(
-      fontFamily: serifFamily,
-      bodyColor: textPrimary,
-      displayColor: textPrimary,
-    ));
+    final serifBodyTheme = _forceNoItalics(
+      baseTextTheme.apply(
+        fontFamily: effectiveSerifFamily,
+        bodyColor: textPrimary,
+        displayColor: textPrimary,
+      ),
+    );
 
     final textTheme = sansTheme.copyWith(
       // Explicitly pin title styles to non-italic Gotham; some platform font
       // matching can otherwise pick an italic face when one is bundled.
-      titleLarge: const TextStyle(
-        fontFamily: sansFamily,
+      titleLarge: TextStyle(
+        fontFamily: effectiveSansFamily,
         fontStyle: FontStyle.normal,
       ).merge(sansTheme.titleLarge),
-      titleMedium: const TextStyle(
-        fontFamily: sansFamily,
+      titleMedium: TextStyle(
+        fontFamily: effectiveSansFamily,
         fontStyle: FontStyle.normal,
       ).merge(sansTheme.titleMedium),
-      titleSmall: const TextStyle(
-        fontFamily: sansFamily,
+      titleSmall: TextStyle(
+        fontFamily: effectiveSansFamily,
         fontStyle: FontStyle.normal,
       ).merge(sansTheme.titleSmall),
       bodyLarge: serifBodyTheme.bodyLarge?.copyWith(
@@ -121,16 +165,16 @@ class AppTheme {
       colorScheme: baseScheme,
       scaffoldBackgroundColor: surface,
       textTheme: textTheme,
-      fontFamilyFallback: sansFallback,
-      fontFamily: sansFamily,
+      fontFamilyFallback: effectiveSansFallback,
+      fontFamily: effectiveSansFamily,
       appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: bsuBlue,
         foregroundColor: Colors.white,
-        titleTextStyle: const TextStyle(
-          fontFamily: sansFamily,
+        titleTextStyle: TextStyle(
+          fontFamily: effectiveSansFamily,
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: Colors.white,
@@ -156,11 +200,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: const TextStyle(
-            fontFamily: sansFamily,
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -172,23 +212,18 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: const TextStyle(
-            fontFamily: sansFamily,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surfaceCard,
         labelStyle: const TextStyle(
-          fontFamily: sansFamily,
           fontSize: 16,
           color: textSecondary,
           fontWeight: FontWeight.w500,
         ),
         hintStyle: TextStyle(
-          fontFamily: sansFamily,
           fontSize: 16,
           color: textSecondary.withValues(alpha: 0.7),
         ),
@@ -204,7 +239,10 @@ class AppTheme {
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,

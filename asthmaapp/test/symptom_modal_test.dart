@@ -1,7 +1,10 @@
 import 'package:asthmaapp/pages/home_page.dart';
+import 'package:asthmaapp/services/locale_service.dart';
+import 'package:asthmaapp/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +36,20 @@ void main() {
       ) async {
         await tester.binding.setSurfaceSize(const Size(1200, 1600));
         addTearDown(() => tester.binding.setSurfaceSize(null));
-        await tester.pumpWidget(const MaterialApp(home: HomePage()));
+        final localeNotifier = ValueNotifier<Locale?>(const Locale('en'));
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: localeNotifier.value,
+            supportedLocales: LocaleService.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: HomePage(localeNotifier: localeNotifier),
+          ),
+        );
 
         await tester.tap(
           find.text('Select symptom level'),

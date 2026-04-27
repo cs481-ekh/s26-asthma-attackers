@@ -1,0 +1,173 @@
+{
+  "@@locale": "en",
+  "appName": "Asthma Activity Advisor",
+  "menuAbout": "About",
+  "menuLanguage": "Language",
+  "languageTitle": "Language",
+  "languageEnglish": "English",
+  "languageSpanish": "Spanish",
+  "actionClose": "Close",
+  "actionChange": "Change",
+  "actionRetry": "Retry",
+  "homeHeroTitle": "An app for asthma warriors",
+  "homeHeroSubtitle": "Check air quality and get activity ideas that fit how your child feels today.",
+  "symptomLevelTitle": "Child's symptom level",
+  "selectSymptomLevel": "Select symptom level",
+  "symptomSelectTitle": "Select symptom level",
+  "symptomSelectSubtitle": "Choose the option that best describes the child's current respiratory or asthma symptoms.",
+  "confirmSelection": "Confirm selection",
+  "locationTitle": "Location for air quality",
+  "locationHelperWeb": "Enter a ZIP code or city name (required on web). ",
+  "locationHelperMobile": "Use your device location or enter a ZIP code or city. ",
+  "moreDetails": "More details",
+  "usingYourLocation": "Using your location",
+  "zipOrCityLabel": "ZIP code or city",
+  "zipOrCityHint": "e.g. 83702 or Boise",
+  "useMyLocation": "Use my location",
+  "gettingLocation": "Getting location…",
+  "getRecommendation": "Get activity recommendation",
+  "snackSelectSymptomFirst": "Please select a symptom level first.",
+  "snackEnterZipOrCityWeb": "Enter a ZIP code or city name to get air quality.",
+  "snackEnterZipOrCityMobile": "Use \"Use my location\" or enter a ZIP code or city to get air quality.",
+  "aboutTitle": "About",
+  "recommendationTitle": "Activity recommendation",
+  "goBack": "Go back",
+  "currentLocation": "Current location",
+  "loadingLocation": "Loading location",
+  "locationServicesDisabled": "Location services are disabled. Enable them in device settings.",
+  "locationPermissionDenied": "Location permission was denied. Enter a ZIP code or city instead.",
+  "locationPermissionDeniedForever": "Location is permanently denied. Enter a ZIP code or city instead.",
+  "locationFetchFailed": "Could not get location. Try again or enter a ZIP code or city.",
+  "validationEnterZipOrCity": "Enter a ZIP code or city name.",
+  "validationInvalidZipOrCity": "Enter a valid 5-digit ZIP code (e.g. 83702) or a city name (e.g. Boise).",
+  "symptomALabel": "No respiratory or asthma symptoms",
+  "symptomBLabel": "Few respiratory or asthma symptoms",
+  "symptomCLabel": "Daily respiratory or asthma symptoms",
+  "symptomADescription": "Child has no breathing issues or asthma symptoms.",
+  "symptomBDescription": "Child has mild or occasional symptoms.",
+  "symptomCDescription": "Child has symptoms most days or more severe symptoms.",
+  "aboutOverviewBody": "The Asthma Activity Advisor app guides users by asking about a child’s current symptoms, referencing real-time air pollution levels, and calculating recommended activity levels based on established health rules. This functionality helps reduce risk and provides peace of mind for families and youth-serving organizations.",
+  "aboutObjectiveTitle": "Objective",
+  "aboutObjectiveBody": "Air pollution-especially from wildfire smoke, traffic, and industrial emissions-can trigger severe asthma symptoms. Caregivers and educators often lack a simple, reliable way to assess when outdoor activity is safe. This app addresses that gap by delivering timely, evidence-based guidance to help prevent avoidable asthma attacks.\n\nAsthma is a chronic illness that affects many children. While it cannot be cured, it can be managed with the right information at the right time. This app is designed to be widely accessible and to support schools, families, and caregivers in keeping children safe and active.",
+  "aboutHowItWorksTitle": "How It Works",
+  "aboutHowItWorksBody": "The app digitizes a traditional asthma slide rule into a mobile and web application. It integrates real-time Air Quality Index (AQI) data with child respiratory health status and standardized physical activity guidelines.\n\nBy combining these inputs, the app provides clear recommendations on appropriate activity levels under current air quality conditions.",
+  "aboutInputsTitle": "Inputs",
+  "aboutInputsBody": "• Child respiratory health status (symptom level)\n• Air Quality Index (AQI)",
+  "aboutOutputTitle": "Output",
+  "aboutOutputBody": "• Recommended activity levels (low, moderate, vigorous)",
+  "aboutAirQualityRisksTitle": "Understanding Air Quality and Health Risks",
+  "aboutAirQualityRisksBody": "Air pollution occurs when pollutants such as smoke, vehicle exhaust, industrial emissions, and other airborne particles accumulate in the atmosphere. Under certain weather conditions-such as limited air movement or atmospheric layering-these pollutants can become trapped near the ground rather than dispersing into the upper atmosphere. When this happens, pollution levels increase and can create hazy or foggy conditions that reduce visibility and degrade air quality. These conditions may persist until weather patterns change and cleaner air can circulate and disperse the pollutants.\n\nWildfire smoke can travel hundreds of miles downwind. Larger particles, such as ash, typically fall out closer to the fire. However, the smallest particles pose the greatest health risk and can travel the farthest. These tiny particles-known as PM2.5 (about 1/50 the size of a grain of sand)-can be inhaled deep into the air sacs of the lungs, where they can cause inflammation.\n\nShort-term exposure to smoke and other air pollutants can irritate the eyes, nose, and throat and may trigger coughing or breathing difficulties. Long-term exposure may contribute to lung damage and increase the risk of cardiovascular problems. People with pre-existing lung or respiratory conditions are especially vulnerable, although poor air quality can affect anyone.",
+  "aboutResourcesTitle": "Resources",
+  "aboutResourceAirNow": "AirNow AQI (Boise)",
+  "aboutResourceBsuAirQuality": "Boise State Air Quality & Smoke Resources",
+  "aboutContactTitle": "Contact Us",
+  "aboutContactBody": "For any questions or more information, please contact the Boise State University Resilience Institute.",
+  "aboutResourceBsuResilienceInstitute": "Boise State Resilience Institute",
+  "recommendationMissingLocationMessage": "Please use \"Use my location\" or enter a ZIP code or city on the home screen to see air quality.",
+  "recommendationNoLocationProvided": "No location provided. Use \"Use my location\" or enter a ZIP or city.",
+  "nextDayGuidanceButton": "View next-day activity guidance",
+  "nextDayGuidanceTitle": "Next-day activity guidance",
+  "nextDayGuidanceSubtitle": "Forecast-based recommendation for tomorrow.",
+  "loadingNextDayForecast": "Loading next-day forecast",
+  "forecastAqiLabel": "Forecast AQI: {aqi} ({category})",
+  "@forecastAqiLabel": {
+    "placeholders": {
+      "aqi": {},
+      "category": {}
+    }
+  },
+  "locationLabelValue": "Location: {location}",
+  "@locationLabelValue": {
+    "placeholders": {
+      "location": {}
+    }
+  },
+  "airQualityTitle": "Air quality",
+  "loadingAirQuality": "Loading air quality",
+  "loadingAirQualityEllipsis": "Loading air quality…",
+  "enterLocationForAqi": "Enter location on home to see AQI",
+  "aqiLabelValue": "AQI: {aqi}  •  {category}",
+  "@aqiLabelValue": {
+    "placeholders": {
+      "aqi": {},
+      "category": {}
+    }
+  },
+  "updatedRelative": "Updated {relative}",
+  "@updatedRelative": {
+    "placeholders": {
+      "relative": {}
+    }
+  },
+  "lastKnownAqi": "Last known: AQI {aqi} ({category})",
+  "@lastKnownAqi": {
+    "placeholders": {
+      "aqi": {},
+      "category": {}
+    }
+  },
+  "relativeJustNow": "just now",
+  "relativeMinutesAgo": "{minutes} min ago",
+  "@relativeMinutesAgo": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "relativeHoursAgo": "{hours} hr ago",
+  "@relativeHoursAgo": {
+    "placeholders": {
+      "hours": {}
+    }
+  },
+  "relativeDaysAgo": "{days} day(s) ago",
+  "@relativeDaysAgo": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "activityLoading": "{label}: loading...",
+  "@activityLoading": {
+    "placeholders": {
+      "label": {}
+    }
+  },
+  "activityRecommended": "Recommended",
+  "activityNotRecommended": "Not recommended",
+  "recommendedActivityTitle": "Recommended activity",
+  "recommendationPendingMessage": "Recommendation will appear here once AQI is available.",
+  "lightActivity": "Light activity",
+  "mediumActivity": "Medium activity",
+  "vigorousActivity": "Vigorous activity",
+  "activityExamplesTitle": "Activity examples",
+  "exampleLight1": "Walking slowly on level ground",
+  "exampleLight2": "Sitting in chair, standing",
+  "exampleLight3": "Using computer",
+  "exampleLight4": "Writing on paper or black board",
+  "exampleLight5": "Cooking, eating, drinking",
+  "exampleLight6": "Playing musical instruments",
+  "exampleLight7": "Carrying school books",
+  "exampleModerate1": "Playing badminton",
+  "exampleModerate2": "Skateboarding",
+  "exampleModerate3": "Aerobic dancing",
+  "exampleModerate4": "Competitive table tennis",
+  "exampleModerate5": "Softball - slow pitch",
+  "exampleModerate6": "Shooting basketballs",
+  "exampleModerate7": "Outdoor carpentry",
+  "exampleVigorous1": "Running, jogging",
+  "exampleVigorous2": "Performing jumping jacks",
+  "exampleVigorous3": "Football, Soccer, Baseball",
+  "exampleVigorous4": "Competitive swimming",
+  "exampleVigorous5": "Ice hockey, Water polo",
+  "exampleVigorous6": "Racquetball, Squash",
+  "explanationPending": "Explanation will appear here after you get a recommendation.",
+  "explanationGreen": "Air quality is good. Most people, even with symptoms, can safely perform outdoor activities.",
+  "explanationYellow": "Air quality is acceptable. Sensitive individuals may experience mild symptoms, so consider limited prolonged exertion.",
+  "explanationOrange": "Air quality is unhealthy for sensitive groups. Symptoms may worsen, so reduce outdoor activity intensity and duration.",
+  "explanationRed": "Air quality is unhealthy. It is recommended to avoid strenuous outdoor activities, especially if experiencing symptoms.",
+  "explanationPurple": "Air quality is very unhealthy. Outdoor activities should be avoided due to high risk of symptom aggravation.",
+  "explanationUnknown": "Unable to determine recommendation",
+  "whyRecommendationTitle": "Why this recommendation",
+  "moreInformation": "More information",
+  "disclaimerText": "This app is a guidance tool only and is not a substitute for professional medical advice. It does not diagnose asthma or any medical condition and does not provide emergency medical guidance."
+}
+
