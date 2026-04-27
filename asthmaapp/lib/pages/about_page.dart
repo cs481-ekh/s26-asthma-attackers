@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app_theme.dart';
+import '../widgets/bottom_logos_bar.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -53,14 +54,38 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('About'),
+      bottomNavigationBar: const BottomLogosBar(
+        riLogoHeight: 104,
+        soeWordmarkHeight: 72,
+        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SafeArea(
+              bottom: false,
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: const Icon(Icons.arrow_back),
+                    tooltip: 'Go back',
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'About',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.textPrimary,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
             // Overview
             sectionTitle(context, "Asthma Activity Advisor"),

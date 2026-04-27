@@ -7,6 +7,7 @@ import '../models/recommendation_args.dart';
 import '../services/aqi_service.dart';
 import '../services/airnow_aqi_service.dart';
 import '../widgets/airnow_forecast_widget.dart';
+import '../widgets/bottom_logos_bar.dart';
 import '../widgets/symptom_modal.dart';
 import '../services/slide_rule_service.dart';
 
@@ -324,6 +325,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
           ),
         ],
       ),
+      bottomNavigationBar: const BottomLogosBar(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),

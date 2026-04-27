@@ -65,6 +65,8 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/images/RI_Logo.png
+    - assets/images/SoE_two color wordmark.png
 
   fonts:
     - family: Gotham

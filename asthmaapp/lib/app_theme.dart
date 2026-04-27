@@ -183,11 +183,13 @@ class AppTheme {
         fillColor: surfaceCard,
         labelStyle: const TextStyle(
           fontFamily: sansFamily,
+          fontSize: 16,
           color: textSecondary,
           fontWeight: FontWeight.w500,
         ),
         hintStyle: TextStyle(
           fontFamily: sansFamily,
+          fontSize: 16,
           color: textSecondary.withValues(alpha: 0.7),
         ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
