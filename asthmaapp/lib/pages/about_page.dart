@@ -126,8 +126,9 @@ class AboutPage extends StatelessWidget {
               "• Recommended activity levels (low, moderate, vigorous)",
             ),
 
-            sectionTitle("Understanding Air Quality and Health Risks"),
+            sectionTitle(context, "Understanding Air Quality and Health Risks"),
             sectionBody(
+              context,
               "Air pollution occurs when pollutants such as smoke, vehicle exhaust, industrial emissions, and other airborne particles accumulate in the atmosphere. Under certain weather conditions—such as limited air movement or atmospheric layering—these pollutants can become trapped near the ground rather than dispersing into the upper atmosphere. When this happens, pollution levels increase and can create hazy or foggy conditions that reduce visibility and degrade air quality. These conditions may persist until weather patterns change and cleaner air can circulate and disperse the pollutants.\n\n"
               "Wildfire smoke can travel hundreds of miles downwind. Larger particles, such as ash, typically fall out closer to the fire. However, the smallest particles pose the greatest health risk and can travel the farthest. These tiny particles—known as PM2.5 (about 1/50 the size of a grain of sand)—can be inhaled deep into the air sacs of the lungs, where they can cause inflammation.\n\n"
               "Short-term exposure to smoke and other air pollutants can irritate the eyes, nose, and throat and may trigger coughing or breathing difficulties. Long-term exposure may contribute to lung damage and increase the risk of cardiovascular problems. People with pre-existing lung or respiratory conditions are especially vulnerable, although poor air quality can affect anyone."
@@ -157,24 +158,18 @@ class AboutPage extends StatelessWidget {
 
             // Contact
             // Contact Us
-            sectionTitle("Contact Us"),
+            sectionTitle(context, "Contact Us"),
             sectionBody(
+              context,
               "For any questions or more information, please contact the Boise State University Resilience Institute.",
             ),
 
             const SizedBox(height: 8),
 
-            GestureDetector(
-              onTap: () => _launchURL(
-                "https://www.boisestate.edu/research-resilience/",
-              ),
-              child: const Text(
-                "Boise State Resilience Institute",
-                style: TextStyle(
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
+            link(
+              context,
+              label: "Boise State Resilience Institute",
+              url: "https://www.boisestate.edu/research-resilience/",
             ),
           
             const SizedBox(height: 40),

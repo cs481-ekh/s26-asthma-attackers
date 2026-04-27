@@ -1,6 +1,6 @@
 {
     "name": "Asthma Activity Advisor",
-    "short_name": "Activity Advisor",
+    "short_name": "Asthma Activity Advisor",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0B6E6E",
