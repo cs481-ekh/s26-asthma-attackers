@@ -12,6 +12,7 @@ import '../services/locale_service.dart';
 import '../utils/location_validator.dart';
 import '../widgets/bottom_logos_bar.dart';
 import '../widgets/symptom_modal.dart';
+import '../widgets/section_header_with_info.dart';
 
 /// Main entry page: symptom selection and location input.
 /// Location can be entered as ZIP/city or approved via device geolocation.
@@ -41,6 +42,71 @@ class _HomePageState extends State<HomePage> {
     _locationController.dispose();
     _locationFocus.dispose();
     super.dispose();
+  }
+
+  void _showAsthmaInfoDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        Widget bullet(String text) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("• "),
+                Expanded(child: Text(text)),
+              ],
+            ),
+          );
+        }
+
+        return AlertDialog(
+          title: const Text('Asthma Information'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Asthma Symptoms',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                bullet('Chronic (regular) cough'),
+                bullet('Wheezing'),
+                bullet('Shortness of breath'),
+                bullet('Tightness in the chest'),
+                bullet('Breathing difficulties'),
+                bullet('Trouble sleeping'),
+                bullet('Trouble participating in physical activities'),
+
+                const SizedBox(height: 16),
+
+                const Text(
+                  'Asthma Triggers',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                bullet('Infections of the ear and nose'),
+                bullet('Infections of the sinuses'),
+                bullet('Air pollution'),
+                bullet('Cigarette smoke'),
+                bullet('Cold air, Dry air, Pollens'),
+                bullet('Dust, Mites, Molds'),
+                bullet('Vigorous exercise'),
+                bullet('Psychological stress'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _openAirNowDetails() async {
@@ -274,12 +340,10 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Semantics(
                           header: true,
-                          child: Text(
-                            l10n.symptomLevelTitle,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.textPrimary,
-                            ),
+                          child: 
+                            SectionHeaderWithInfo(
+                            title: l10n.symptomLevelTitle,
+                            onInfoPressed: _showAsthmaInfoDialog,
                           ),
                         ),
                         const SizedBox(height: 14),
