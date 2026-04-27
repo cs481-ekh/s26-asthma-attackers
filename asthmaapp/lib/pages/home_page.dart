@@ -8,6 +8,7 @@ import '../app_theme.dart';
 import '../models/recommendation_args.dart';
 import '../pages/recommendation_page.dart';
 import '../utils/location_validator.dart';
+import '../widgets/bottom_logos_bar.dart';
 import '../widgets/symptom_modal.dart';
 
 /// Main entry page: symptom selection and location input.
@@ -215,6 +216,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      bottomNavigationBar: const BottomLogosBar(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -247,7 +249,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 20),
               Semantics(
                 container: true,
                 child: Card(
@@ -288,7 +290,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 14),
               Semantics(
                 container: true,
                 child: Card(
@@ -319,12 +321,18 @@ class _HomePageState extends State<HomePage> {
                                 text: kIsWeb
                                     ? 'Enter a ZIP code or city name (required on web). '
                                     : 'Use your device location or enter a ZIP code or city. ',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppTheme.textSecondary,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.45,
+                                ),
                               ),
                               TextSpan(
                                 text: 'More details',
                                 style: TextStyle(
                                   color: theme.colorScheme.primary,
                                   decoration: TextDecoration.underline,
+                                  fontWeight: FontWeight.w700,
                                 ),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = _openAirNowDetails,
@@ -332,7 +340,7 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 10),
                         if (!kIsWeb && _useDeviceLocation && _latitude != null && _longitude != null)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 12),
@@ -381,7 +389,7 @@ class _HomePageState extends State<HomePage> {
                             onSubmitted: (_) => _getRecommendation(),
                           ),
                           if (!kIsWeb) ...[
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 10),
                             OutlinedButton.icon(
                               onPressed: _locationLoading ? null : _useMyLocation,
                               icon: _locationLoading
@@ -412,12 +420,12 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _symptomLevel == null || !_hasLocation ? null : _getRecommendation,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 18),
-                  backgroundColor: AppTheme.accentCoral,
+                  backgroundColor: AppTheme.bsuOrange,
                   foregroundColor: Colors.white,
                 ),
                 child: const Text('Get activity recommendation'),

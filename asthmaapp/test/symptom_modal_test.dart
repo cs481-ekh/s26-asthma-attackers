@@ -36,7 +36,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: HomePage()));
 
         await tester.tap(
-          find.widgetWithText(OutlinedButton, 'Select symptom level'),
+          find.text('Select symptom level'),
         );
         await tester.pumpAndSettle();
 
