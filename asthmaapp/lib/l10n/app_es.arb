@@ -1,0 +1,172 @@
+{
+  "@@locale": "es",
+  "appName": "Asesor de Actividad para el Asma",
+  "menuAbout": "Acerca de",
+  "menuLanguage": "Idioma",
+  "languageTitle": "Idioma",
+  "languageEnglish": "Inglés",
+  "languageSpanish": "Español",
+  "actionClose": "Cerrar",
+  "actionChange": "Cambiar",
+  "actionRetry": "Reintentar",
+  "homeHeroTitle": "Una app para guerreros del asma",
+  "homeHeroSubtitle": "Consulta la calidad del aire y obtén ideas de actividad según cómo se sienta tu hijo hoy.",
+  "symptomLevelTitle": "Nivel de síntomas del niño",
+  "selectSymptomLevel": "Seleccionar nivel de síntomas",
+  "symptomSelectTitle": "Seleccionar nivel de síntomas",
+  "symptomSelectSubtitle": "Elige la opción que mejor describa los síntomas respiratorios o de asma actuales del niño.",
+  "confirmSelection": "Confirmar selección",
+  "locationTitle": "Ubicación para la calidad del aire",
+  "locationHelperWeb": "Ingresa un código ZIP o el nombre de una ciudad (requerido en la web). ",
+  "locationHelperMobile": "Usa la ubicación del dispositivo o ingresa un ZIP o ciudad. ",
+  "moreDetails": "Más detalles",
+  "usingYourLocation": "Usando tu ubicación",
+  "zipOrCityLabel": "Código ZIP o ciudad",
+  "zipOrCityHint": "p. ej., 83702 o Boise",
+  "useMyLocation": "Usar mi ubicación",
+  "gettingLocation": "Obteniendo ubicación…",
+  "getRecommendation": "Obtener recomendación de actividad",
+  "snackSelectSymptomFirst": "Primero selecciona un nivel de síntomas.",
+  "snackEnterZipOrCityWeb": "Ingresa un ZIP o ciudad para obtener la calidad del aire.",
+  "snackEnterZipOrCityMobile": "Usa \"Usar mi ubicación\" o ingresa un ZIP o ciudad para obtener la calidad del aire.",
+  "aboutTitle": "Acerca de",
+  "recommendationTitle": "Recomendación de actividad",
+  "goBack": "Volver",
+  "currentLocation": "Ubicación actual",
+  "loadingLocation": "Cargando ubicación",
+  "locationServicesDisabled": "Los servicios de ubicación están desactivados. Actívalos en la configuración del dispositivo.",
+  "locationPermissionDenied": "Se denegó el permiso de ubicación. Ingresa un código ZIP o ciudad.",
+  "locationPermissionDeniedForever": "La ubicación fue denegada permanentemente. Ingresa un código ZIP o ciudad.",
+  "locationFetchFailed": "No se pudo obtener la ubicación. Inténtalo de nuevo o ingresa un código ZIP o ciudad.",
+  "validationEnterZipOrCity": "Ingresa un código ZIP o el nombre de una ciudad.",
+  "validationInvalidZipOrCity": "Ingresa un código ZIP válido de 5 dígitos (p. ej., 83702) o una ciudad (p. ej., Boise).",
+  "symptomALabel": "Sin síntomas respiratorios o de asma",
+  "symptomBLabel": "Pocos síntomas respiratorios o de asma",
+  "symptomCLabel": "Síntomas respiratorios o de asma diarios",
+  "symptomADescription": "El niño no presenta problemas respiratorios ni síntomas de asma.",
+  "symptomBDescription": "El niño presenta síntomas leves u ocasionales.",
+  "symptomCDescription": "El niño presenta síntomas la mayoría de los días o síntomas más graves.",
+  "aboutOverviewBody": "La app Asesor de Actividad para el Asma guía a los usuarios preguntando sobre los síntomas actuales del niño, consultando los niveles de contaminación del aire en tiempo real y calculando niveles de actividad recomendados según reglas de salud establecidas. Esta funcionalidad ayuda a reducir el riesgo y brinda tranquilidad a las familias y a las organizaciones que atienden a jóvenes.",
+  "aboutObjectiveTitle": "Objetivo",
+  "aboutObjectiveBody": "La contaminación del aire-especialmente por humo de incendios forestales, tráfico y emisiones industriales-puede desencadenar síntomas graves de asma. Los cuidadores y educadores a menudo no tienen una forma simple y confiable de evaluar cuándo es seguro realizar actividades al aire libre. Esta app cubre esa necesidad al ofrecer orientación oportuna y basada en evidencia para ayudar a prevenir crisis de asma evitables.\n\nEl asma es una enfermedad crónica que afecta a muchos niños. Aunque no tiene cura, puede manejarse con la información correcta en el momento adecuado. Esta app está diseñada para ser ampliamente accesible y apoyar a escuelas, familias y cuidadores para mantener a los niños seguros y activos.",
+  "aboutHowItWorksTitle": "Cómo funciona",
+  "aboutHowItWorksBody": "La app digitaliza una regla deslizante tradicional del asma en una aplicación móvil y web. Integra datos en tiempo real del Índice de Calidad del Aire (AQI) con el estado respiratorio del niño y pautas estandarizadas de actividad física.\n\nAl combinar estas entradas, la app ofrece recomendaciones claras sobre niveles de actividad apropiados según las condiciones actuales de calidad del aire.",
+  "aboutInputsTitle": "Entradas",
+  "aboutInputsBody": "• Estado de salud respiratoria del niño (nivel de síntomas)\n• Índice de Calidad del Aire (AQI)",
+  "aboutOutputTitle": "Salida",
+  "aboutOutputBody": "• Niveles de actividad recomendados (baja, moderada, vigorosa)",
+  "aboutAirQualityRisksTitle": "Comprender la calidad del aire y los riesgos para la salud",
+  "aboutAirQualityRisksBody": "La contaminación del aire ocurre cuando contaminantes como humo, gases de escape de vehículos, emisiones industriales y otras partículas en el aire se acumulan en la atmósfera. En ciertas condiciones climáticas-como poco movimiento del aire o estratificación atmosférica-estos contaminantes pueden quedar atrapados cerca del suelo en lugar de dispersarse en la atmósfera superior. Cuando esto sucede, los niveles de contaminación aumentan y pueden crear condiciones brumosas que reducen la visibilidad y degradan la calidad del aire. Estas condiciones pueden persistir hasta que cambien los patrones climáticos y el aire limpio pueda circular y dispersar los contaminantes.\n\nEl humo de incendios forestales puede viajar cientos de millas a sotavento. Las partículas más grandes, como la ceniza, suelen caer más cerca del incendio. Sin embargo, las partículas más pequeñas representan el mayor riesgo para la salud y pueden viajar más lejos. Estas diminutas partículas, conocidas como PM2.5 (aproximadamente 1/50 del tamaño de un grano de arena), pueden inhalarse profundamente hasta los sacos de aire de los pulmones, donde pueden causar inflamación.\n\nLa exposición a corto plazo al humo y otros contaminantes del aire puede irritar los ojos, la nariz y la garganta y puede provocar tos o dificultades para respirar. La exposición a largo plazo puede contribuir al daño pulmonar y aumentar el riesgo de problemas cardiovasculares. Las personas con afecciones pulmonares o respiratorias preexistentes son especialmente vulnerables, aunque la mala calidad del aire puede afectar a cualquier persona.",
+  "aboutResourcesTitle": "Recursos",
+  "aboutResourceAirNow": "AQI de AirNow (Boise)",
+  "aboutResourceBsuAirQuality": "Recursos de Boise State sobre calidad del aire y humo",
+  "aboutContactTitle": "Contáctanos",
+  "aboutContactBody": "Para cualquier pregunta o más información, comunícate con el Instituto de Resiliencia de Boise State University.",
+  "aboutResourceBsuResilienceInstitute": "Instituto de Resiliencia de Boise State",
+  "recommendationMissingLocationMessage": "Usa \"Usar mi ubicación\" o ingresa un código ZIP o ciudad en la pantalla principal para ver la calidad del aire.",
+  "recommendationNoLocationProvided": "No se proporcionó ubicación. Usa \"Usar mi ubicación\" o ingresa un ZIP o ciudad.",
+  "nextDayGuidanceButton": "Ver guía de actividad para el día siguiente",
+  "nextDayGuidanceTitle": "Guía de actividad para el día siguiente",
+  "nextDayGuidanceSubtitle": "Recomendación para mañana basada en el pronóstico.",
+  "loadingNextDayForecast": "Cargando pronóstico del día siguiente",
+  "forecastAqiLabel": "AQI pronosticado: {aqi} ({category})",
+  "@forecastAqiLabel": {
+    "placeholders": {
+      "aqi": {},
+      "category": {}
+    }
+  },
+  "locationLabelValue": "Ubicación: {location}",
+  "@locationLabelValue": {
+    "placeholders": {
+      "location": {}
+    }
+  },
+  "airQualityTitle": "Calidad del aire",
+  "loadingAirQuality": "Cargando calidad del aire",
+  "loadingAirQualityEllipsis": "Cargando calidad del aire…",
+  "enterLocationForAqi": "Ingresa una ubicación en inicio para ver el AQI",
+  "aqiLabelValue": "AQI: {aqi}  •  {category}",
+  "@aqiLabelValue": {
+    "placeholders": {
+      "aqi": {},
+      "category": {}
+    }
+  },
+  "updatedRelative": "Actualizado {relative}",
+  "@updatedRelative": {
+    "placeholders": {
+      "relative": {}
+    }
+  },
+  "lastKnownAqi": "Último dato: AQI {aqi} ({category})",
+  "@lastKnownAqi": {
+    "placeholders": {
+      "aqi": {},
+      "category": {}
+    }
+  },
+  "relativeJustNow": "justo ahora",
+  "relativeMinutesAgo": "hace {minutes} min",
+  "@relativeMinutesAgo": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "relativeHoursAgo": "hace {hours} h",
+  "@relativeHoursAgo": {
+    "placeholders": {
+      "hours": {}
+    }
+  },
+  "relativeDaysAgo": "hace {days} día(s)",
+  "@relativeDaysAgo": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "activityLoading": "{label}: cargando...",
+  "@activityLoading": {
+    "placeholders": {
+      "label": {}
+    }
+  },
+  "activityRecommended": "Recomendada",
+  "activityNotRecommended": "No recomendada",
+  "recommendedActivityTitle": "Actividad recomendada",
+  "recommendationPendingMessage": "La recomendación aparecerá aquí cuando el AQI esté disponible.",
+  "lightActivity": "Actividad ligera",
+  "mediumActivity": "Actividad moderada",
+  "vigorousActivity": "Actividad vigorosa",
+  "activityExamplesTitle": "Ejemplos de actividad",
+  "exampleLight1": "Caminar lentamente en terreno plano",
+  "exampleLight2": "Sentarse en una silla, estar de pie",
+  "exampleLight3": "Usar la computadora",
+  "exampleLight4": "Escribir en papel o pizarra",
+  "exampleLight5": "Cocinar, comer, beber",
+  "exampleLight6": "Tocar instrumentos musicales",
+  "exampleLight7": "Llevar libros escolares",
+  "exampleModerate1": "Jugar bádminton",
+  "exampleModerate2": "Andar en patineta",
+  "exampleModerate3": "Baile aeróbico",
+  "exampleModerate4": "Tenis de mesa competitivo",
+  "exampleModerate5": "Softbol de lanzamiento lento",
+  "exampleModerate6": "Tirar al aro en baloncesto",
+  "exampleModerate7": "Carpintería al aire libre",
+  "exampleVigorous1": "Correr, trotar",
+  "exampleVigorous2": "Hacer saltos de tijera",
+  "exampleVigorous3": "Fútbol americano, fútbol, béisbol",
+  "exampleVigorous4": "Natación competitiva",
+  "exampleVigorous5": "Hockey sobre hielo, waterpolo",
+  "exampleVigorous6": "Ráquetbol, squash",
+  "explanationPending": "La explicación aparecerá aquí después de obtener una recomendación.",
+  "explanationGreen": "La calidad del aire es buena. La mayoría de las personas, incluso con síntomas, pueden realizar actividades al aire libre de forma segura.",
+  "explanationYellow": "La calidad del aire es aceptable. Las personas sensibles pueden presentar síntomas leves, así que considera limitar el esfuerzo prolongado.",
+  "explanationOrange": "La calidad del aire no es saludable para grupos sensibles. Los síntomas pueden empeorar, así que reduce la intensidad y duración de la actividad al aire libre.",
+  "explanationRed": "La calidad del aire no es saludable. Se recomienda evitar actividades intensas al aire libre, especialmente si hay síntomas.",
+  "explanationPurple": "La calidad del aire es muy no saludable. Deben evitarse las actividades al aire libre debido al alto riesgo de agravar los síntomas.",
+  "explanationUnknown": "No se pudo determinar la recomendación",
+  "whyRecommendationTitle": "Por qué esta recomendación",
+  "moreInformation": "Más información",
+  "disclaimerText": "Esta app es solo una herramienta de orientación y no sustituye el consejo médico profesional. No diagnostica asma ni ninguna condición médica y no brinda orientación médica de emergencia."
+}

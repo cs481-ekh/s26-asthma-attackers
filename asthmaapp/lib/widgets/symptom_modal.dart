@@ -1,23 +1,57 @@
 import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 /// Symptom level as defined by NIH (project plan 3.1.2).
 /// A = No respiratory or asthma symptoms
 /// B = Few respiratory or asthma symptoms
 /// C = Daily respiratory or asthma symptoms
 enum SymptomLevel {
-  a('A', 'No respiratory or asthma symptoms',
-      'Child has no breathing issues or asthma symptoms.'),
-  b('B', 'Few respiratory or asthma symptoms',
-      'Child has mild or occasional symptoms.'),
-  c('C', 'Daily respiratory or asthma symptoms',
-      'Child has symptoms most days or more severe symptoms.');
+  a(
+    'A',
+    'No respiratory or asthma symptoms',
+    'Child has no breathing issues or asthma symptoms.',
+  ),
+  b(
+    'B',
+    'Few respiratory or asthma symptoms',
+    'Child has mild or occasional symptoms.',
+  ),
+  c(
+    'C',
+    'Daily respiratory or asthma symptoms',
+    'Child has symptoms most days or more severe symptoms.',
+  );
 
   const SymptomLevel(this.id, this.label, this.description);
   final String id;
   final String label;
   final String description;
+}
+
+extension SymptomLevelLocalization on SymptomLevel {
+  String localizedLabel(AppLocalizations l10n) {
+    switch (this) {
+      case SymptomLevel.a:
+        return l10n.symptomALabel;
+      case SymptomLevel.b:
+        return l10n.symptomBLabel;
+      case SymptomLevel.c:
+        return l10n.symptomCLabel;
+    }
+  }
+
+  String localizedDescription(AppLocalizations l10n) {
+    switch (this) {
+      case SymptomLevel.a:
+        return l10n.symptomADescription;
+      case SymptomLevel.b:
+        return l10n.symptomBDescription;
+      case SymptomLevel.c:
+        return l10n.symptomCDescription;
+    }
+  }
 }
 
 /// Outline for the general symptom popup modal.
@@ -35,8 +69,10 @@ class SymptomModal extends StatelessWidget {
 
   /// Shows the symptom selection modal (bottom sheet).
   /// Returns the selected [SymptomLevel] when the user confirms, or null if dismissed.
-  static Future<SymptomLevel?> show(BuildContext context,
-      {SymptomLevel? current}) {
+  static Future<SymptomLevel?> show(
+    BuildContext context, {
+    SymptomLevel? current,
+  }) {
     return showModalBottomSheet<SymptomLevel>(
       context: context,
       isScrollControlled: true,
@@ -61,10 +97,7 @@ class SymptomModal extends StatelessWidget {
 }
 
 class _SymptomModalContent extends StatefulWidget {
-  const _SymptomModalContent({
-    this.initialSelection,
-    required this.onSelect,
-  });
+  const _SymptomModalContent({this.initialSelection, required this.onSelect});
 
   final SymptomLevel? initialSelection;
   final ValueChanged<SymptomLevel> onSelect;
@@ -84,6 +117,7 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
       minChildSize: 0.4,
@@ -110,20 +144,20 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
               Semantics(
                 header: true,
                 child: Text(
-                  'Select symptom level',
+                  l10n.symptomSelectTitle,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary,
-                      ),
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Choose the option that best describes the child\'s current respiratory or asthma symptoms.',
+                l10n.symptomSelectSubtitle,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
-                      height: 1.45,
-                    ),
+                  color: AppTheme.textSecondary,
+                  height: 1.45,
+                ),
               ),
               const SizedBox(height: 20),
               Expanded(
@@ -142,7 +176,7 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: isSelected
-                                    ? AppTheme.bsuBlue.withValues(alpha: 0.06)
+                                  ? AppTheme.bsuBlue.withValues(alpha: 0.06)
                                   : null,
                               border: Border.all(
                                 color: isSelected
@@ -170,7 +204,7 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        level.label,
+                                        level.localizedLabel(l10n),
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleSmall
@@ -182,19 +216,17 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
                                     if (isSelected)
                                       Icon(
                                         Icons.check_circle,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
                                         size: 22,
                                       ),
                                   ],
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  level.description,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
+                                  level.localizedDescription(l10n),
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: AppTheme.textSecondary,
                                         height: 1.4,
@@ -219,7 +251,7 @@ class _SymptomModalContentState extends State<_SymptomModalContent> {
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 48),
                 ),
-                child: const Text('Confirm selection'),
+                child: Text(l10n.confirmSelection),
               ),
             ],
           ),

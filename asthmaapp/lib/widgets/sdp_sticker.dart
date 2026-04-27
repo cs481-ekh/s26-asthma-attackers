@@ -17,10 +17,7 @@ class SdpFooterSticker extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         // 🖼 Sticker
-        Image.asset(
-          'assets/images/bsu-sdp-button.png',
-          width: 150,
-        ),
+        Image.asset('assets/images/bsu-sdp-button.png', width: 150),
 
         const SizedBox(height: 12),
 
@@ -44,7 +41,7 @@ class SdpFooterSticker extends StatelessWidget {
         const Text("Lauren Nutting", textAlign: TextAlign.center),
         const Text("John Patrick", textAlign: TextAlign.center),
         const Text("Cameron Quitugua", textAlign: TextAlign.center),
-        const Text("Hailey Whitaker", textAlign: TextAlign.center),
+        const Text("Hailey Revel-Whitaker", textAlign: TextAlign.center),
 
         const SizedBox(height: 10),
 
