@@ -38,6 +38,77 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  void _showAsthmaInfoDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+
+        Widget bullet(String text) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("• "),
+                Expanded(child: Text(text)),
+              ],
+            ),
+          );
+        }
+
+        return AlertDialog(
+          title: const Text('Asthma Information'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Asthma Symptoms',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                bullet('Chronic (regular) cough'),
+                bullet('Wheezing'),
+                bullet('Shortness of breath'),
+                bullet('Tightness in the chest'),
+                bullet('Breathing difficulties'),
+                bullet('Trouble sleeping'),
+                bullet('Trouble participating in physical activities'),
+
+                const SizedBox(height: 16),
+
+                Text(
+                  'Asthma Triggers',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                bullet('Infections of the ear and nose'),
+                bullet('Infections of the sinuses'),
+                bullet('Air pollution'),
+                bullet('Cigarette smoke'),
+                bullet('Cold air, Dry air, Pollens'),
+                bullet('Dust, Mites, Molds'),
+                bullet('Vigorous exercise'),
+                bullet('Psychological stress'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _openAirNowDetails() async {
     final uri = Uri.parse(
       'https://www.airnow.gov/?city=Boise&state=ID&country=USA',
@@ -258,12 +329,24 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Semantics(
                           header: true,
-                          child: Text(
-                            'Child\'s symptom level',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.textPrimary,
-                            ),
+                          child: Row(
+                            children: [
+                              Text(
+                                'Child\'s symptom level',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              IconButton(
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                icon: const Icon(Icons.info_outline, size: 20),
+                                onPressed: _showAsthmaInfoDialog,
+                                tooltip: 'Asthma info',
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 14),
