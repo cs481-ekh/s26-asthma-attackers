@@ -140,6 +140,114 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get actionClose;
 
+  /// No description provided for @asthmaInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Asthma Information'**
+  String get asthmaInfoTitle;
+
+  /// No description provided for @asthmaSymptomsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Asthma Symptoms'**
+  String get asthmaSymptomsTitle;
+
+  /// No description provided for @asthmaSymptomBullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Chronic (regular) cough'**
+  String get asthmaSymptomBullet1;
+
+  /// No description provided for @asthmaSymptomBullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheezing'**
+  String get asthmaSymptomBullet2;
+
+  /// No description provided for @asthmaSymptomBullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortness of breath'**
+  String get asthmaSymptomBullet3;
+
+  /// No description provided for @asthmaSymptomBullet4.
+  ///
+  /// In en, this message translates to:
+  /// **'Tightness in the chest'**
+  String get asthmaSymptomBullet4;
+
+  /// No description provided for @asthmaSymptomBullet5.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathing difficulties'**
+  String get asthmaSymptomBullet5;
+
+  /// No description provided for @asthmaSymptomBullet6.
+  ///
+  /// In en, this message translates to:
+  /// **'Trouble sleeping'**
+  String get asthmaSymptomBullet6;
+
+  /// No description provided for @asthmaSymptomBullet7.
+  ///
+  /// In en, this message translates to:
+  /// **'Trouble participating in physical activities'**
+  String get asthmaSymptomBullet7;
+
+  /// No description provided for @asthmaTriggersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Asthma Triggers'**
+  String get asthmaTriggersTitle;
+
+  /// No description provided for @asthmaTriggerBullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Infections of the ear and nose'**
+  String get asthmaTriggerBullet1;
+
+  /// No description provided for @asthmaTriggerBullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Infections of the sinuses'**
+  String get asthmaTriggerBullet2;
+
+  /// No description provided for @asthmaTriggerBullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Air pollution'**
+  String get asthmaTriggerBullet3;
+
+  /// No description provided for @asthmaTriggerBullet4.
+  ///
+  /// In en, this message translates to:
+  /// **'Cigarette smoke'**
+  String get asthmaTriggerBullet4;
+
+  /// No description provided for @asthmaTriggerBullet5.
+  ///
+  /// In en, this message translates to:
+  /// **'Cold air, Dry air, Pollens'**
+  String get asthmaTriggerBullet5;
+
+  /// No description provided for @asthmaTriggerBullet6.
+  ///
+  /// In en, this message translates to:
+  /// **'Dust, Mites, Molds'**
+  String get asthmaTriggerBullet6;
+
+  /// No description provided for @asthmaTriggerBullet7.
+  ///
+  /// In en, this message translates to:
+  /// **'Vigorous exercise'**
+  String get asthmaTriggerBullet7;
+
+  /// No description provided for @asthmaTriggerBullet8.
+  ///
+  /// In en, this message translates to:
+  /// **'Psychological stress'**
+  String get asthmaTriggerBullet8;
+
   /// No description provided for @actionChange.
   ///
   /// In en, this message translates to:
