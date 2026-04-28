@@ -44,6 +44,9 @@ import 'aqi_service.dart';
 /// }
 /// ```
 class AirNowAqiService implements AqiService {
+  static const String _missingKeyMessage =
+      'API key not configured. Build web with --dart-define=AIRNOW_API_KEY=... or provide AIRNOW_API_KEY in .env.';
+
   static const String _apiKeyFromDefine = String.fromEnvironment(
     'AIRNOW_API_KEY',
     defaultValue: '',
@@ -73,10 +76,10 @@ class AirNowAqiService implements AqiService {
 
   static String? _resolveApiKey() {
     return _firstPresent([
-      dotenv.env['AIRNOW_API_KEY'],
-      dotenv.env['API_KEY'],
       _apiKeyFromDefine,
       _apiKeyFromLegacyDefine,
+      dotenv.env['AIRNOW_API_KEY'],
+      dotenv.env['API_KEY'],
     ]);
   }
 
@@ -128,7 +131,23 @@ class AirNowAqiService implements AqiService {
       'https://www.airnowapi.org/aq/forecast/latLong/';
 
   /// Timeout duration for AirNow API requests (coordinate/ZIP can be slow).
-  static const Duration _timeout = Duration(seconds: 20);
+  static const Duration _timeout = Duration(seconds: 30);
+  static const int _maxRetryAttempts = 2;
+
+  Future<http.Response> _getWithRetry(
+    Uri uri, {
+    Map<String, String>? headers,
+  }) async {
+    var attempt = 0;
+    while (true) {
+      try {
+        return await _httpClient.get(uri, headers: headers).timeout(_timeout);
+      } on TimeoutException {
+        attempt += 1;
+        if (attempt >= _maxRetryAttempts) rethrow;
+      }
+    }
+  }
 
   @override
   Future<AqiResult> getAqiForLocation(String locationInput) async {
@@ -157,7 +176,7 @@ class AirNowAqiService implements AqiService {
 
     if (_apiKey == null || _apiKey.isEmpty) {
       return const AqiFailure(
-        message: 'API key not configured.',
+        message: _missingKeyMessage,
       );
     }
 
@@ -218,7 +237,7 @@ class AirNowAqiService implements AqiService {
 
     if (_apiKey == null || _apiKey.isEmpty) {
       return const AqiFailure(
-        message: 'API key not configured.',
+        message: _missingKeyMessage,
       );
     }
 
@@ -272,7 +291,7 @@ class AirNowAqiService implements AqiService {
 
     if (_apiKey == null || _apiKey.isEmpty) {
       return const AqiFailure(
-        message: 'API key not configured.',
+        message: _missingKeyMessage,
       );
     }
 
@@ -328,7 +347,7 @@ class AirNowAqiService implements AqiService {
 
     if (_apiKey == null || _apiKey.isEmpty) {
       return const AqiFailure(
-        message: 'API key not configured.',
+        message: _missingKeyMessage,
       );
     }
 
@@ -374,7 +393,7 @@ class AirNowAqiService implements AqiService {
         },
       );
 
-      final response = await _httpClient.get(uri).timeout(_timeout);
+      final response = await _getWithRetry(uri);
 
       if (response.statusCode == 401) {
         return const AqiFailure(message: 'Invalid API key.');
@@ -395,9 +414,7 @@ class AirNowAqiService implements AqiService {
       final result = _parseObservationResponse(response.body, zipCode);
       return result;
     } on TimeoutException {
-      return const AqiFailure(
-        message: 'Request timed out. The air quality service may be slow—tap Retry to try again.',
-      );
+      return null;
     } catch (e) {
       return AqiFailure(message: 'Observation fetch error: $e');
     }
@@ -421,7 +438,7 @@ class AirNowAqiService implements AqiService {
         },
       );
 
-      final response = await _httpClient.get(uri).timeout(_timeout);
+      final response = await _getWithRetry(uri);
 
       if (response.statusCode == 401) {
         return const AqiFailure(message: 'Invalid API key.');
@@ -437,9 +454,7 @@ class AirNowAqiService implements AqiService {
       final label = locationLabel ?? 'Latitude: $latitude, Longitude: $longitude';
       return _parseObservationResponse(response.body, label);
     } on TimeoutException {
-      return const AqiFailure(
-        message: 'Request timed out. The air quality service may be slow—tap Retry to try again.',
-      );
+      return null;
     } catch (e) {
       return AqiFailure(message: 'Observation fetch error: $e');
     }
@@ -470,7 +485,7 @@ class AirNowAqiService implements AqiService {
       },
     );
 
-    final response = await _httpClient.get(uri).timeout(_timeout);
+    final response = await _getWithRetry(uri);
 
     if (response.statusCode == 401) {
       return const AqiFailure(message: 'Invalid API key.');
@@ -518,7 +533,7 @@ class AirNowAqiService implements AqiService {
       },
     );
 
-    final response = await _httpClient.get(uri).timeout(_timeout);
+    final response = await _getWithRetry(uri);
 
     if (response.statusCode == 401) {
       return const AqiFailure(message: 'Invalid API key.');
@@ -556,12 +571,12 @@ class AirNowAqiService implements AqiService {
           'limit': '1',
         },
       );
-      final response = await _httpClient.get(
+      final response = await _getWithRetry(
         uri,
         headers: {
           'User-Agent': 'AsthmaActivityAdvisor/1.0 (educational; air quality app)',
         },
-      ).timeout(const Duration(seconds: 12));
+      );
 
       if (response.statusCode != 200) return null;
 
