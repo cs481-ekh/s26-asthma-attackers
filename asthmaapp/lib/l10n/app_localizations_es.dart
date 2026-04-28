@@ -427,4 +427,8 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get disclaimerText =>
       'Esta app es solo una herramienta de orientación y no sustituye el consejo médico profesional. No diagnostica asma ni ninguna condición médica y no brinda orientación médica de emergencia.';
+
+  @override
+  String get noNextDayForecastMessage =>
+      'El pronóstico para el día siguiente aún no está disponible para esta ubicación. Inténtalo más tarde.';
 }

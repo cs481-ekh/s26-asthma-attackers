@@ -422,4 +422,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get disclaimerText =>
       'This app is a guidance tool only and is not a substitute for professional medical advice. It does not diagnose asthma or any medical condition and does not provide emergency medical guidance.';
+
+  @override
+  String get noNextDayForecastMessage =>
+      'Next-day forecast isn\'t available yet for this location. Try again later.';
 }

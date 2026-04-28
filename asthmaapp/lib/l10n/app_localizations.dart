@@ -823,6 +823,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This app is a guidance tool only and is not a substitute for professional medical advice. It does not diagnose asthma or any medical condition and does not provide emergency medical guidance.'**
   String get disclaimerText;
+
+  /// No description provided for @noNextDayForecastMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next-day forecast isn\'t available yet for this location. Try again later.'**
+  String get noNextDayForecastMessage;
 }
 
 class _AppLocalizationsDelegate

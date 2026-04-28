@@ -168,5 +168,6 @@
   "explanationUnknown": "No se pudo determinar la recomendación",
   "whyRecommendationTitle": "Por qué esta recomendación",
   "moreInformation": "Más información",
-  "disclaimerText": "Esta app es solo una herramienta de orientación y no sustituye el consejo médico profesional. No diagnostica asma ni ninguna condición médica y no brinda orientación médica de emergencia."
+  "disclaimerText": "Esta app es solo una herramienta de orientación y no sustituye el consejo médico profesional. No diagnostica asma ni ninguna condición médica y no brinda orientación médica de emergencia.",
+  "noNextDayForecastMessage": "El pronóstico para el día siguiente aún no está disponible para esta ubicación. Inténtalo más tarde."
 }
