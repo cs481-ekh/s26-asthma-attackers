@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Asthma Activity Advisor — a Flutter app that combines asthma symptom levels with local Air Quality Index (AQI) data to recommend safer activity levels."
+    />
+    <title>Asthma Activity Advisor | GitHub Pages</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+
+  <body>
+    <header class="site-header">
+      <nav class="nav container">
+        <a class="brand" href="#top" aria-label="Asthma Activity Advisor home">
+          <img
+            class="brand-mark"
+            src="./assets/logo.png"
+            alt="Asthma Activity Advisor logo"
+            width="40"
+            height="40"
+          />
+          <span class="brand-name">Asthma Activity Advisor</span>
+        </a>
+
+        <div class="nav-links">
+          <a href="#abstract">Abstract</a>
+          <a href="#description">Description</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#screenshots">Screenshots</a>
+          <a
+            class="btn btn-secondary"
+            href="https://github.com/cs481-ekh/s26-asthma-attackers"
+            target="_blank"
+            rel="noreferrer"
+            >Repository</a
+          >
+        </div>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="container hero-grid">
+          <div>
+            <p class="kicker">BSU CS481 Capstone · Team Asthma Attackers</p>
+            <h1 class="hero-title">Asthma Activity Advisor</h1>
+            <p class="hero-subtitle">
+              A cross-platform Flutter app that uses asthma symptoms and the
+              Air Quality Index (AQI) to help people make safer activity choices
+              during smoke and poor-air events.
+            </p>
+
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="#abstract">Read the abstract</a>
+              <a class="btn btn-ghost" href="#screenshots">See screenshots</a>
+            </div>
+
+            <div class="meta">
+              <div class="meta-card">
+                <div class="meta-label">Project title</div>
+                <div class="meta-value">Asthma Activity Advisor</div>
+              </div>
+              <div class="meta-card">
+                <div class="meta-label">Tech stack</div>
+                <div class="meta-value">Flutter · AirNow API · Firebase Hosting</div>
+              </div>
+              <div class="meta-card">
+                <div class="meta-label">Locales</div>
+                <div class="meta-value">English · Spanish</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-panel" aria-label="Highlights">
+            <div class="hero-panel-inner">
+              <div class="pill">What the app does</div>
+              <ul class="checklist">
+                <li>Select a symptom level (A–C)</li>
+                <li>Enter a ZIP code or city (or use device location)</li>
+                <li>Fetch AQI and show clear activity guidance</li>
+              </ul>
+              <div class="hero-note">
+                <strong>Disclaimer:</strong> The app provides informational
+                guidance and is not a substitute for professional medical
+                advice.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="team">
+        <div class="container">
+          <h2>Team Members</h2>
+          <div class="team-grid">
+            <div class="person">
+              <div class="person-name">Lauren Nutting</div>
+              <div class="person-meta">laurennutting@u.boisestate.edu</div>
+            </div>
+            <div class="person">
+              <div class="person-name">Cameron Quitugua</div>
+              <div class="person-meta">cameronquitugua@u.boisestate.edu</div>
+            </div>
+            <div class="person">
+              <div class="person-name">John Patrick</div>
+              <div class="person-meta">johnpatrick@u.boisestate.edu</div>
+            </div>
+            <div class="person">
+              <div class="person-name">Hailey Revel-Whitaker</div>
+              <div class="person-meta">haileyrevelwhita@u.boisestate.edu</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt" id="abstract">
+        <div class="container narrow">
+          <h2>Project Abstract</h2>
+          <p class="lead">
+            <strong>Project statement:</strong> People with asthma often need to
+            decide whether it’s safe to be active outdoors—especially during
+            wildfire smoke and other poor-air-quality events. Our goal was to
+            build a simple tool that combines a person’s current symptom level
+            with local air quality data to provide clear, actionable activity
+            guidance.
+          </p>
+          <p>
+            We built the <strong>Asthma Activity Advisor</strong>, a Flutter
+            application that lets users select a symptom category (A–C), provide
+            a location by ZIP code or city (or via device location), and fetch
+            real-time Air Quality Index (AQI) data from the U.S. EPA’s AirNow
+            service. The app prioritizes current observations and falls back to
+            a daily forecast when needed. Using the AQI category and the user’s
+            symptom level, the app generates <em>OK</em> or
+            <em>Not Recommended</em> recommendations for light, moderate, and
+            vigorous activity. The app supports English and Spanish and is
+            deployed as a web app to make access and sharing easy.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="description">
+        <div class="container">
+          <h2>Project Description</h2>
+          <div class="cards">
+            <article class="card">
+              <h3>Flutter application</h3>
+              <p>
+                A single codebase targeting web (and runnable locally on other
+                platforms during development).
+              </p>
+            </article>
+            <article class="card">
+              <h3>AirNow AQI integration</h3>
+              <p>
+                Fetches AQI by ZIP or city (with geocoding), using observations
+                first and forecast as a fallback.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Recommendation engine</h3>
+              <p>
+                Maps symptom level + AQI category through a slide-rule style
+                decision matrix to generate activity guidance.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Localization</h3>
+              <p>
+                English/Spanish UI with saved language preference for consistent
+                return visits.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt" id="how-it-works">
+        <div class="container">
+          <h2>How it works</h2>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div>
+                <div class="step-title">Collect inputs</div>
+                <div class="step-body">
+                  The user selects a symptom level and enters a ZIP/city (or
+                  uses device location when available).
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div>
+                <div class="step-title">Fetch AQI</div>
+                <div class="step-body">
+                  The app requests AQI data from the AirNow API (current
+                  observations; forecast fallback if needed).
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div>
+                <div class="step-title">Generate guidance</div>
+                <div class="step-body">
+                  AQI category + symptom level is evaluated to produce OK / Not
+                  Recommended guidance for three activity levels.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout">
+            <div class="callout-title">Deployment note</div>
+            <div class="callout-body">
+              The AirNow API key is injected at build time for the web build.
+              In CI, this is provided via GitHub Actions secrets.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="screenshots">
+        <div class="container">
+          <h2>Screenshots</h2>
+          <p class="muted">
+            Add screenshots to <code>docs/assets/screenshots/</code> using the
+            filenames below. The page is already wired up; once you add the
+            images, they’ll appear automatically.
+          </p>
+
+          <div class="gallery">
+            <figure class="shot">
+              <img
+                src="./assets/screenshots/home.png"
+                alt="Home screen"
+                loading="lazy"
+              />
+              <figcaption>Home screen (symptoms + location)</figcaption>
+            </figure>
+            <figure class="shot">
+              <img
+                src="./assets/screenshots/recommendations.png"
+                alt="Recommendation screen"
+                loading="lazy"
+              />
+              <figcaption>Recommendations (AQI + guidance)</figcaption>
+            </figure>
+            <figure class="shot">
+              <img
+                src="./assets/screenshots/about.png"
+                alt="About screen"
+                loading="lazy"
+              />
+              <figcaption>About / resources</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="container footer-inner">
+          <div>
+            <div class="footer-title">Asthma Activity Advisor</div>
+            <div class="footer-subtitle">
+              BSU CS481 Capstone · Team Asthma Attackers
+            </div>
+          </div>
+          <div class="footer-links">
+            <a href="#top">Back to top</a>
+            <a
+              href="https://github.com/cs481-ekh/s26-asthma-attackers"
+              target="_blank"
+              rel="noreferrer"
+              >Repository</a
+            >
+          </div>
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>
+
