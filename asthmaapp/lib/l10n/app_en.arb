@@ -7,6 +7,24 @@
   "languageEnglish": "English",
   "languageSpanish": "Spanish",
   "actionClose": "Close",
+  "asthmaInfoTitle": "Asthma Information",
+  "asthmaSymptomsTitle": "Asthma Symptoms",
+  "asthmaSymptomBullet1": "Chronic (regular) cough",
+  "asthmaSymptomBullet2": "Wheezing",
+  "asthmaSymptomBullet3": "Shortness of breath",
+  "asthmaSymptomBullet4": "Tightness in the chest",
+  "asthmaSymptomBullet5": "Breathing difficulties",
+  "asthmaSymptomBullet6": "Trouble sleeping",
+  "asthmaSymptomBullet7": "Trouble participating in physical activities",
+  "asthmaTriggersTitle": "Asthma Triggers",
+  "asthmaTriggerBullet1": "Infections of the ear and nose",
+  "asthmaTriggerBullet2": "Infections of the sinuses",
+  "asthmaTriggerBullet3": "Air pollution",
+  "asthmaTriggerBullet4": "Cigarette smoke",
+  "asthmaTriggerBullet5": "Cold air, Dry air, Pollens",
+  "asthmaTriggerBullet6": "Dust, Mites, Molds",
+  "asthmaTriggerBullet7": "Vigorous exercise",
+  "asthmaTriggerBullet8": "Psychological stress",
   "actionChange": "Change",
   "actionRetry": "Retry",
   "homeHeroTitle": "An app for asthma warriors",
@@ -168,6 +186,7 @@
   "explanationUnknown": "Unable to determine recommendation",
   "whyRecommendationTitle": "Why this recommendation",
   "moreInformation": "More information",
-  "disclaimerText": "This app is a guidance tool only and is not a substitute for professional medical advice. It does not diagnose asthma or any medical condition and does not provide emergency medical guidance."
+  "disclaimerText": "This app is a guidance tool only and is not a substitute for professional medical advice. It does not diagnose asthma or any medical condition and does not provide emergency medical guidance.",
+  "noNextDayForecastMessage": "Next-day forecast isn't available yet for this location. Try again later."
 }
 

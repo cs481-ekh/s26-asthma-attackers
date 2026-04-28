@@ -79,6 +79,7 @@ flutter:
     - assets/images/
     - assets/images/RI_Logo.png
     - assets/images/SoE_two color wordmark.png
+    - assets/images/BSU_SPPH_Logo.png
 
   fonts:
     - family: Gotham

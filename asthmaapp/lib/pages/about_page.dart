@@ -66,7 +66,8 @@ class AboutPage extends StatelessWidget {
       bottomNavigationBar: const BottomLogosBar(
         riLogoHeight: 104,
         soeWordmarkHeight: 72,
-        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        spphLogoHeight: 76,
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 18),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),

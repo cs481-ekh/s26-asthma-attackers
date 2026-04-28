@@ -47,14 +47,16 @@ class _HomePageState extends State<HomePage> {
   void _showAsthmaInfoDialog() {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
+        final l10n = AppLocalizations.of(dialogContext)!;
+
         Widget bullet(String text) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("• "),
+                const Text('• '),
                 Expanded(child: Text(text)),
               ],
             ),
@@ -62,46 +64,46 @@ class _HomePageState extends State<HomePage> {
         }
 
         return AlertDialog(
-          title: const Text('Asthma Information'),
+          title: Text(l10n.asthmaInfoTitle),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Asthma Symptoms',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  l10n.asthmaSymptomsTitle,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                bullet('Chronic (regular) cough'),
-                bullet('Wheezing'),
-                bullet('Shortness of breath'),
-                bullet('Tightness in the chest'),
-                bullet('Breathing difficulties'),
-                bullet('Trouble sleeping'),
-                bullet('Trouble participating in physical activities'),
+                bullet(l10n.asthmaSymptomBullet1),
+                bullet(l10n.asthmaSymptomBullet2),
+                bullet(l10n.asthmaSymptomBullet3),
+                bullet(l10n.asthmaSymptomBullet4),
+                bullet(l10n.asthmaSymptomBullet5),
+                bullet(l10n.asthmaSymptomBullet6),
+                bullet(l10n.asthmaSymptomBullet7),
 
                 const SizedBox(height: 16),
 
-                const Text(
-                  'Asthma Triggers',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  l10n.asthmaTriggersTitle,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                bullet('Infections of the ear and nose'),
-                bullet('Infections of the sinuses'),
-                bullet('Air pollution'),
-                bullet('Cigarette smoke'),
-                bullet('Cold air, Dry air, Pollens'),
-                bullet('Dust, Mites, Molds'),
-                bullet('Vigorous exercise'),
-                bullet('Psychological stress'),
+                bullet(l10n.asthmaTriggerBullet1),
+                bullet(l10n.asthmaTriggerBullet2),
+                bullet(l10n.asthmaTriggerBullet3),
+                bullet(l10n.asthmaTriggerBullet4),
+                bullet(l10n.asthmaTriggerBullet5),
+                bullet(l10n.asthmaTriggerBullet6),
+                bullet(l10n.asthmaTriggerBullet7),
+                bullet(l10n.asthmaTriggerBullet8),
               ],
             ),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l10n.actionClose),
             ),
           ],
         );

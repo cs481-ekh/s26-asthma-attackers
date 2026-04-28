@@ -30,6 +30,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionClose => 'Close';
 
   @override
+  String get asthmaInfoTitle => 'Asthma Information';
+
+  @override
+  String get asthmaSymptomsTitle => 'Asthma Symptoms';
+
+  @override
+  String get asthmaSymptomBullet1 => 'Chronic (regular) cough';
+
+  @override
+  String get asthmaSymptomBullet2 => 'Wheezing';
+
+  @override
+  String get asthmaSymptomBullet3 => 'Shortness of breath';
+
+  @override
+  String get asthmaSymptomBullet4 => 'Tightness in the chest';
+
+  @override
+  String get asthmaSymptomBullet5 => 'Breathing difficulties';
+
+  @override
+  String get asthmaSymptomBullet6 => 'Trouble sleeping';
+
+  @override
+  String get asthmaSymptomBullet7 =>
+      'Trouble participating in physical activities';
+
+  @override
+  String get asthmaTriggersTitle => 'Asthma Triggers';
+
+  @override
+  String get asthmaTriggerBullet1 => 'Infections of the ear and nose';
+
+  @override
+  String get asthmaTriggerBullet2 => 'Infections of the sinuses';
+
+  @override
+  String get asthmaTriggerBullet3 => 'Air pollution';
+
+  @override
+  String get asthmaTriggerBullet4 => 'Cigarette smoke';
+
+  @override
+  String get asthmaTriggerBullet5 => 'Cold air, Dry air, Pollens';
+
+  @override
+  String get asthmaTriggerBullet6 => 'Dust, Mites, Molds';
+
+  @override
+  String get asthmaTriggerBullet7 => 'Vigorous exercise';
+
+  @override
+  String get asthmaTriggerBullet8 => 'Psychological stress';
+
+  @override
   String get actionChange => 'Change';
 
   @override
@@ -422,4 +477,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get disclaimerText =>
       'This app is a guidance tool only and is not a substitute for professional medical advice. It does not diagnose asthma or any medical condition and does not provide emergency medical guidance.';
+
+  @override
+  String get noNextDayForecastMessage =>
+      'Next-day forecast isn\'t available yet for this location. Try again later.';
 }

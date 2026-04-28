@@ -182,11 +182,14 @@ class AirNowAqiService implements AqiService {
 
     try {
       if (LocationValidator.isValidZipCode(trimmed)) {
-        // ZIP code path: use AirNow ZIP endpoints directly
+        // ZIP code path: use AirNow ZIP endpoints directly.
+        // Try forecast when observation is missing or unusable (not only when null).
         final observationResult = await _fetchObservationForZip(trimmed);
-        if (observationResult != null) return observationResult;
+        if (observationResult is AqiSuccess) return observationResult;
         final forecastResult = await _fetchForecastForZip(trimmed);
-        if (forecastResult != null) return forecastResult;
+        if (forecastResult is AqiSuccess) return forecastResult;
+        if (forecastResult is AqiFailure) return forecastResult;
+        if (observationResult is AqiFailure) return observationResult;
       } else {
         // City/place path: geocode to coordinates, then use coordinate endpoints
         final coords = await _geocodePlace(trimmed);
@@ -200,13 +203,15 @@ class AirNowAqiService implements AqiService {
           coords.longitude,
           locationLabel: trimmed,
         );
-        if (observationResult != null) return observationResult;
+        if (observationResult is AqiSuccess) return observationResult;
         final forecastResult = await _fetchForecastForCoords(
           coords.latitude,
           coords.longitude,
           locationLabel: trimmed,
         );
-        if (forecastResult != null) return forecastResult;
+        if (forecastResult is AqiSuccess) return forecastResult;
+        if (forecastResult is AqiFailure) return forecastResult;
+        if (observationResult is AqiFailure) return observationResult;
       }
 
       return const AqiFailure(
@@ -247,14 +252,16 @@ class AirNowAqiService implements AqiService {
         longitude,
         locationLabel: locationLabel,
       );
-      if (observationResult != null) return observationResult;
+      if (observationResult is AqiSuccess) return observationResult;
 
       final forecastResult = await _fetchForecastForCoords(
         latitude,
         longitude,
         locationLabel: locationLabel,
       );
-      if (forecastResult != null) return forecastResult;
+      if (forecastResult is AqiSuccess) return forecastResult;
+      if (forecastResult is AqiFailure) return forecastResult;
+      if (observationResult is AqiFailure) return observationResult;
 
       return const AqiFailure(
         message: 'No air quality data for your location. Try a nearby city or ZIP code.',
@@ -388,7 +395,7 @@ class AirNowAqiService implements AqiService {
         queryParameters: {
           'format': 'application/json',
           'zipCode': zipCode,
-          'distance': '5',
+          'distance': '25',
           'API_KEY': _apiKey,
         },
       );

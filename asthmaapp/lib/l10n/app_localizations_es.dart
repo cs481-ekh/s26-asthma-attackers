@@ -30,6 +30,61 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actionClose => 'Cerrar';
 
   @override
+  String get asthmaInfoTitle => 'Información sobre el asma';
+
+  @override
+  String get asthmaSymptomsTitle => 'Síntomas del asma';
+
+  @override
+  String get asthmaSymptomBullet1 => 'Tos crónica (regular)';
+
+  @override
+  String get asthmaSymptomBullet2 => 'Sibilancias (silbidos al respirar)';
+
+  @override
+  String get asthmaSymptomBullet3 => 'Falta de aire';
+
+  @override
+  String get asthmaSymptomBullet4 => 'Opresión en el pecho';
+
+  @override
+  String get asthmaSymptomBullet5 => 'Dificultad para respirar';
+
+  @override
+  String get asthmaSymptomBullet6 => 'Dificultad para dormir';
+
+  @override
+  String get asthmaSymptomBullet7 =>
+      'Dificultad para participar en actividad física';
+
+  @override
+  String get asthmaTriggersTitle => 'Disparadores del asma';
+
+  @override
+  String get asthmaTriggerBullet1 => 'Infecciones del oído y la nariz';
+
+  @override
+  String get asthmaTriggerBullet2 => 'Infecciones de los senos paranasales';
+
+  @override
+  String get asthmaTriggerBullet3 => 'Contaminación del aire';
+
+  @override
+  String get asthmaTriggerBullet4 => 'Humo del tabaco';
+
+  @override
+  String get asthmaTriggerBullet5 => 'Aire frío, aire seco, polen';
+
+  @override
+  String get asthmaTriggerBullet6 => 'Polvo, ácaros, mohos';
+
+  @override
+  String get asthmaTriggerBullet7 => 'Ejercicio intenso';
+
+  @override
+  String get asthmaTriggerBullet8 => 'Estrés';
+
+  @override
   String get actionChange => 'Cambiar';
 
   @override
@@ -427,4 +482,8 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get disclaimerText =>
       'Esta app es solo una herramienta de orientación y no sustituye el consejo médico profesional. No diagnostica asma ni ninguna condición médica y no brinda orientación médica de emergencia.';
+
+  @override
+  String get noNextDayForecastMessage =>
+      'El pronóstico para el día siguiente aún no está disponible para esta ubicación. Inténtalo más tarde.';
 }
